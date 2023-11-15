@@ -1,3 +1,8 @@
+import random
+
+digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+operators = ['+', '-', '*', '/']
+
 class TreeNode:
     def __init__(self, value):
         self.value = str(value)
@@ -5,7 +10,6 @@ class TreeNode:
         self.right = None
 
 def is_operator(char):
-    operators = ['+', '-', '*', '/', '**']
     return char in operators
 
 def create_expression_tree(expression):
@@ -17,39 +21,45 @@ def create_expression_tree(expression):
             stack.append(expression[i])
             i += 1
         elif expression[i] == ')':
-            right_operand = stack.pop()
-            operator = stack.pop()
-            left_operand = stack.pop()
-            node = TreeNode(operator)
-            node.left = left_operand
-            node.right = right_operand
-            stack.pop() # Remove the opening parenthesis
-            stack.append(node)
+            if len(stack) > 2:
+                right_operand = stack.pop()
+                operator = stack.pop()
+                left_operand = stack.pop()
+                stack.pop()
+                node = TreeNode(operator)
+                node.left = left_operand
+                node.right = right_operand
+                stack.append(node)
+            else:
+                raise ValueError("Mismatched parentheses in the expression")
             i += 1
         elif expression[i].isalnum():
             start = i
             while i < len(expression) and (expression[i].isalnum() or expression[i] == '.'):
                 i += 1
-            operand = TreeNode(expression[start:i])
-            stack.append(operand)
+            stack.append(TreeNode(expression[start:i]))
         elif is_operator(expression[i]):
-            # while (stack and is_operator(stack[-1]) and
-            #        (expression[i] in '+-' or expression[i] in '*/' and stack[-1] in '*/' or
-            #         expression[i] == '^' and stack[-1] == '^' and expression[i] != stack[-1])):
-            if (expression[i] == '*' and expression[i+1] == '*'):
-                operator = stack.append("**")
-                i += 2
-            else:
-                operator = stack.append(expression[i])
-                i += 1
+            while (len(stack) > 2 and is_operator(stack[-2]) and
+                    ((expression[i] in '+-' and stack[-2] in '*/') or
+                    (expression[i] in '*/' and stack[-2] in '*/') or
+                    (expression[i] in '+-' and stack[-2] in '+-'))):
+                right_operand = stack.pop()
+                operator = stack.pop()
+                left_operand = stack.pop()
+                node = TreeNode(operator)
+                node.left = left_operand
+                node.right = right_operand
+                stack.append(node)
+            stack.append(expression[i])
+            i += 1
         elif expression[i] == ' ':
             i += 1
         else:
             raise ValueError("Invalid character in the expression")
 
     while len(stack) > 1:
-        operator = stack.pop()
         right_operand = stack.pop()
+        operator = stack.pop()
         left_operand = stack.pop()
         node = TreeNode(operator)
         node.left = left_operand
@@ -62,14 +72,13 @@ def create_expression_tree(expression):
     return stack[0]
 
 def print_tree(root, level=0, prefix=""):
-    if isinstance(root, TreeNode):
-        if level == 0:
-            print(prefix + str(root.value))
-        else:
-            print(" " * (level * 3) + prefix + str(root.value))
-        if root.left is not None or root.right is not None:
-            print_tree(root.left, level + 1, "L: ")
-            print_tree(root.right, level + 1, "R: ")
+    if level == 0:
+        print(prefix + str(root.value))
+    else:
+        print(" " * (level * 3) + prefix + str(root.value))
+    if root.left is not None or root.right is not None:
+        print_tree(root.left, level + 1, "L: ")
+        print_tree(root.right, level + 1, "R: ")
 
 def evaluate(node, x):
     if node != None:
@@ -90,7 +99,11 @@ def evaluate(node, x):
                 return evaluate(node.left, x) ** evaluate(node.right, x)
     return None
 
-tree = create_expression_tree('((x+2)*3)')
+def mutate(expression_root, mutation_rate):
+    if random.random() < mutation_rate:
+        x = 0
+    return expression_root
+tree = create_expression_tree('(x+2)*3)')
 print_tree(tree)
-result = evaluate(tree, 2)
-print(result)
+# result = evaluate(tree, 2)
+# print(result)

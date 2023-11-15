@@ -12,27 +12,16 @@ max_generations = 100
 mutation_rate = 0.5
 number_of_parents = 10
 
-digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-operators = ['+', '-', '*', '/']
-
 # Generate a random individual (equation)
-def generate_individual(equation = ""):
-    if (equation == ""):
-        equation = 'x'
-        equation += random.choice(operators)
-        equation += random.choice(digits)
-    else:
-        changeOperator = random.getrandbits(1)
-        if (changeOperator == 1):
-            equation[1] = random.choice(operators)
-        else:
-            equation[2] = random.choice(digits)
-    return equation
+def generate_individual():
+    expression = TreeNode(random.choice(operators))
+    expression.left = TreeNode('x')
+    expression.right = TreeNode(random.choice(digits))
+    return expression
 
 def fitness(expression):
-    expression_to_evaluate = f"lambda x: {expression}"
     try:
-        function = eval(expression_to_evaluate)
+        function = evaluate(expression)
         predicted_y = [function(xi) for xi in x_values]
         mse = np.mean((np.array(predicted_y) - y_values) ** 2)
         return (1.0 / (mse + 1e-3), expression)  # Avoid division by zero
@@ -55,12 +44,15 @@ for generation in range(max_generations):
     # Create a new population through crossover and mutation
     new_population = [t[1] for t in selected_parents]
 
+    i = 0
     while len(new_population) < population_size:
-        parent1, parent2 = random.choices(selected_parents, k=2)
-        parent1 = parent1[1]
-        parent2 = parent2[1]
-        crossover_point = random.randint(1, len(parent1) - 1)
-        child = parent1[:crossover_point] + parent2[crossover_point:]
+        # parent1, parent2 = random.choices(selected_parents, k=2)
+        # parent1 = parent1[1]
+        # parent2 = parent2[1]
+        # crossover_point = random.randint(1, len(parent1) - 1)
+        # child = parent1[:crossover_point] + parent2[crossover_point:]
+
+        child = new_population[i]
         
         # Apply mutation
         if random.random() < mutation_rate:
@@ -72,6 +64,11 @@ for generation in range(max_generations):
             child = child[:mutation_point] + mutated_gene + child[mutation_point + 1:]
 
         new_population.append(child)
+
+        if i + 1 == number_of_parents:
+            i = 0
+        else:
+            i += 1
 
     population = new_population
 
