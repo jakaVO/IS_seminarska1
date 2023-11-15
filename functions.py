@@ -5,7 +5,7 @@ class TreeNode:
         self.right = None
 
 def is_operator(char):
-    operators = ['+', '-', '*', '/']
+    operators = ['+', '-', '*', '/', '**']
     return char in operators
 
 def create_expression_tree(expression):
@@ -66,9 +66,31 @@ def print_tree(root, level=0, prefix=""):
         if level == 0:
             print(prefix + str(root.value))
         else:
-            print(" " * (level * 4) + prefix + str(root.value))
+            print(" " * (level * 3) + prefix + str(root.value))
         if root.left is not None or root.right is not None:
             print_tree(root.left, level + 1, "L: ")
             print_tree(root.right, level + 1, "R: ")
-    elif isinstance(root, str):
-        print(prefix + root)
+
+def evaluate(node, x):
+    if node != None:
+        if node.value.isalnum():
+            if node.value == 'x':
+                return x
+            return int(node.value)
+        if is_operator(node.value):
+            if node.value == '+':
+                return evaluate(node.left, x) + evaluate(node.right, x)
+            if node.value == '-':
+                return evaluate(node.left, x) - evaluate(node.right, x)
+            if node.value == '*':
+                return evaluate(node.left, x) * evaluate(node.right, x)
+            if node.value == '/':
+                return evaluate(node.left, x) / evaluate(node.right, x)
+            if node.value == '**':
+                return evaluate(node.left, x) ** evaluate(node.right, x)
+    return None
+
+tree = create_expression_tree('((x+2)*3)')
+print_tree(tree)
+result = evaluate(tree, 2)
+print(result)
