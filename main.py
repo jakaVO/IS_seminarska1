@@ -13,6 +13,7 @@ y = np.array([2, 4, 6])
 def fitness_function(ga_instance, solution, solution_idx):
 
     expression = f"lambda x: {solution}"
+    print(expression)
     try:
         function = eval(expression)
         predicted_y = [function(xi) for xi in x]
