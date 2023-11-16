@@ -103,8 +103,6 @@ def evaluate(node, x):
 
 def mutate(root, mutation_rate):
 
-    print_expression(root)
-
     nodes_array = nodes_to_array(root)
     nodes_mutated = []
     for i in range(mutation_rate):
@@ -125,28 +123,25 @@ def mutate(root, mutation_rate):
                         mutation_type == "add_operation" and is_operand(x.value) or
                         mutation_type == "remove_operation" and is_operator(x.value) and (((x.left == None) or (x.left != None and x.left.left == None)) and ((x.right == None) or (x.right != None and x.right.right == None)))
                        ]
-        print(mutation_type)
-        print(len(nodes_array_filtered))
-        random_node = random.choice(nodes_array_filtered)
-        if mutation_type == "change_operator":
-            random_node.value = random.choice([x for x in operators if x != random_node.value])
-        if mutation_type == "change_operand":
-            random_node.value = random.choice([x for x in digits if x != random_node.value])
-        if mutation_type == "add_operation":
-            random_operation = generate_random_tree(1)
-            random_node.value = random_operation.value
-            # mogoce lahko implementiramo da vzame value ki je bil prej na tem mestu:
-            # npr. iz "3" bi potem lahko dobili samo "x + 3", ker zdaj lahko dobimo tudi karkoli drugega npr. "x * 4" kar nima vec veze s "3"
-            random_node.left = random_operation.left
-            random_node.right = random_operation.right
-        if mutation_type== "remove_operation": # tuki je treba nardit se da bo nov value x alpa digit glede na to a je na drugi strani enacbe x alpa digit (bi rabl mogoce node.parent)
-            random_node.value = random.choice(digits + ["x"])
-            random_node.left = None
-            random_node.right = None
-        
-        nodes_mutated.append(random_node)
-        
-    print_expression(root)
+        if len(nodes_array_filtered) > 0:
+            random_node = random.choice(nodes_array_filtered)
+            if mutation_type == "change_operator":
+                random_node.value = random.choice([x for x in operators if x != random_node.value])
+            if mutation_type == "change_operand":
+                random_node.value = random.choice([x for x in digits if x != random_node.value])
+            if mutation_type == "add_operation":
+                random_operation = generate_random_tree(1)
+                random_node.value = random_operation.value
+                # mogoce lahko implementiramo da vzame value ki je bil prej na tem mestu:
+                # npr. iz "3" bi potem lahko dobili samo "x + 3", ker zdaj lahko dobimo tudi karkoli drugega npr. "x * 4" kar nima vec veze s "3"
+                random_node.left = random_operation.left
+                random_node.right = random_operation.right
+            if mutation_type== "remove_operation": # tuki je treba nardit se da bo nov value x alpa digit glede na to a je na drugi strani enacbe x alpa digit (bi rabl mogoce node.parent)
+                random_node.value = random.choice(digits + ["x"])
+                random_node.left = None
+                random_node.right = None
+            
+            nodes_mutated.append(random_node)
 
     return root
 
