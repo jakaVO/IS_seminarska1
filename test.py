@@ -1,17 +1,20 @@
 from functions import *
 import numpy as np
 import random
+import pandas as pd
 
 solution = ""
 
-x_values = np.array([1, 2, 3])
-y_values = np.array([0, 510, 19680])
+df = pd.read_csv("data.txt")
+selected_row = df.iloc[29]
+x_values = np.array(selected_row["Xs"])
+y_values = np.array(selected_row["Ys"])
 
 population_size = 100
 max_generations = 100
 mutation_rate = 1
 number_of_parents = 10
-max_base_population_tree_height = 1
+max_base_population_tree_height = 5
 
 def fitness(expression):
     try:

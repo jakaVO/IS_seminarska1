@@ -104,9 +104,6 @@ def mutate(root, mutation_rate):
 
     print_expression(root)
 
-    if root.value == "x" and root.left == None and root.right == None:
-        return root
-
     nodes_array = nodes_to_array(root)
     nodes_mutated = []
     for i in range(mutation_rate):
@@ -176,6 +173,5 @@ def nodes_to_array(root, arr = []):
     in_order_traversal(root, result)
     return result
 
-tree = generate_random_tree(3)
+tree = generate_random_tree(10)
 print_expression(tree)
-print_tree(tree)
