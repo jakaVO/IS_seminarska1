@@ -12,6 +12,9 @@ class TreeNode:
 def is_operator(char):
     return char in operators
 
+def is_operand(char):
+    return char in digits
+
 def generate_random_tree(max_height, depth=0):
     if random.random() < (1 / max_height) * depth:
         if random.choice([True, False]):
@@ -93,11 +96,65 @@ def evaluate(node, x):
                 return evaluate(node.left, x) ** evaluate(node.right, x)
     return None
 
-def mutate(expression_root, mutation_rate):
-    if random.random() < mutation_rate:
-        x = 0
-    return expression_root
+def mutate(root, mutation_rate):
+    
+    if root.value == "x" and root.left == None and root.right == None:
+        return root
 
-# tree = generate_random_tree(5)
+    nodes_array = nodes_to_array(root)
+    nodes_mutated = []
+    for i in range(mutation_rate):
+        if number_of_x_values(nodes_array) >= 2:
+            mutation_type = random.choice(["change_operator", "change_operand", "add_operation", "remove_operation"])
+        else:
+            mutation_type = random.choice(["change_operator", "change_operand", "add_operation"])
+        # Filter nodes array based on mutation_type (example: if changing the operator, the selected node has to be operator => filter array to only include operator nodes)
+        nodes_array_filtered = [x for x in nodes_array if
+                        x not in nodes_mutated and
+                        mutation_type == "change_operator" and is_operator(x.value) or
+                        mutation_type == "change_operand" and is_operand(x.value) or
+                        mutation_type == "add_operation" and is_operand(x.value) or
+                        mutation_type == "remove_operation" and is_operator(x.value) and (((x.left == None) or (x.left != None and x.left.left == None)) and ((x.right == None) or (x.right != None and x.right.right == None)))
+                       ]
+        print_tree(root)
+        print(mutation_type)
+        print(len(nodes_array))
+        print(len(nodes_array_filtered))
+        random_node = random.choice(nodes_array_filtered)
+        if mutation_type == "change_operator":
+            random_node.value = random.choice([x for x in operators if x != random_node.value])
+        if mutation_type == "change_operand":
+            random_node.value = random.choice([x for x in digits if x != random_node.value])
+        if mutation_type == "add_operation":
+            random_operation = generate_random_tree(1)
+            random_node.value = random_operation.value
+            # mogoce lahko implementiramo da vzame value ki je bil prej na tem mestu:
+            # npr. iz "3" bi potem lahko dobili samo "x + 3", ker zdaj lahko dobimo tudi karkoli drugega npr. "x * 4" kar nima vec veze s "3"
+            random_node.left = random_operation.left
+            random_node.right = random_operation.right
+        if mutation_type== "remove_operation": # tuki je treba nardit se da bo nov value x alpa digit glede na to a je na drugi strani enacbe x alpa digit (bi rabl mogoce node.parent)
+            random_node.value = random.choice(digits + ["x"])
+            random_node.left = None
+            random_node.right = None
+        
+        nodes_mutated.append(random_node)
+        
+    return root
+
+def number_of_x_values(arr):
+    return len([x for x in arr if x.value == "x"])
+
+def nodes_to_array(root, arr = []):
+    if root != None:
+        arr.append(root)
+        if root.left != None:
+            nodes_to_array(root.left, arr)
+        if root.right != None:
+            nodes_to_array(root.right, arr)
+    return arr
+
+# tree = generate_random_tree(2)
+# nodes = nodes_to_array(tree)
 # print_tree(tree)
-# print(evaluate(tree, 1))
+# mutate(tree, mutation_rate=2)
+# print_tree(tree)
