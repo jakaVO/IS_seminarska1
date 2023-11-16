@@ -22,6 +22,10 @@ def fitness_function(ga_instance, solution, solution_idx):
     except Exception as e:
         return 0.0  # Return a low fitness for invalid expressions
 
+n_trees = 98
+tree_height = 5
+trees = generate_trees(n_trees, tree_height)
+
 # Create an instance of the pygad.GA class
 ga = pygad.GA(num_generations=50, 
              num_parents_mating=10, 
@@ -30,10 +34,10 @@ ga = pygad.GA(num_generations=50,
              num_genes=len("a*x"))
 
 # Run the genetic algorithm
-ga.run()
+# ga.run()
 
-df = pd.read_csv("data.txt").head()
-print(df)
+df = pd.read_csv("data.txt")
+# print(df)
 
 # Define a function to parse expressions and build expression trees
 def parse_expression(expression_str):
@@ -52,9 +56,9 @@ def parse_expression(expression_str):
 # df['Expression'] = df['Equation'].apply(parse_expression)
 
 # Get the best solution found by the genetic algorithm
-best_solution = ga.best_solution()
-print(best_solution)
+# best_solution = ga.best_solution()
+#3 print(best_solution)
 
 
 # print("main branch zacni delat")
-print("Raztegnu ti bokm supak")
+# print("Raztegnu ti bom supak")

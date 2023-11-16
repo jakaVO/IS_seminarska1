@@ -35,6 +35,12 @@ def generate_random_tree(max_height, depth=0):
                 node.right.value = 'x'
     return node
 
+def generate_trees(n, height):
+    trees = [TreeNode(None) for _ in range(n)]
+    for i in range(n):
+        trees[i] = generate_random_tree(height)
+    return trees
+
 def print_tree(root, level=0, prefix=""):
     if level == 0:
         print(prefix + str(root.value))
