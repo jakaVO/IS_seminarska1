@@ -45,10 +45,6 @@ def parse_expression(expression_str):
         print(f"Error parsing expression: {expression_str}")
         return None
     
-expression_str = "((x + 3) ** 2)"
-expression_tree = create_expression_tree(expression_str)
-
-# print_tree(expression_tree)
     
 
     
@@ -61,4 +57,4 @@ print(best_solution)
 
 
 # print("main branch zacni delat")
-# print("mark tic")
+print("Raztegnu ti bokm supak")

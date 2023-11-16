@@ -1,7 +1,7 @@
 import random
 
-digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-operators = ['+', '-', '*', '/']
+digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
+operators = ['+', '-', '*', '/', '**']
 
 class TreeNode:
     def __init__(self, value):
@@ -12,64 +12,28 @@ class TreeNode:
 def is_operator(char):
     return char in operators
 
-def create_expression_tree(expression):
-    stack = []
-    i = 0
-
-    while i < len(expression):
-        if expression[i] == '(':
-            stack.append(expression[i])
-            i += 1
-        elif expression[i] == ')':
-            if len(stack) > 2:
-                right_operand = stack.pop()
-                operator = stack.pop()
-                left_operand = stack.pop()
-                stack.pop()
-                node = TreeNode(operator)
-                node.left = left_operand
-                node.right = right_operand
-                stack.append(node)
-            else:
-                raise ValueError("Mismatched parentheses in the expression")
-            i += 1
-        elif expression[i].isalnum():
-            start = i
-            while i < len(expression) and (expression[i].isalnum() or expression[i] == '.'):
-                i += 1
-            stack.append(TreeNode(expression[start:i]))
-        elif is_operator(expression[i]):
-            while (len(stack) > 2 and is_operator(stack[-2]) and
-                    ((expression[i] in '+-' and stack[-2] in '*/') or
-                    (expression[i] in '*/' and stack[-2] in '*/') or
-                    (expression[i] in '+-' and stack[-2] in '+-'))):
-                right_operand = stack.pop()
-                operator = stack.pop()
-                left_operand = stack.pop()
-                node = TreeNode(operator)
-                node.left = left_operand
-                node.right = right_operand
-                stack.append(node)
-            stack.append(expression[i])
-            i += 1
-        elif expression[i] == ' ':
-            i += 1
+def generate_random_tree(max_height, depth=0):
+    if random.random() < (1 / max_height) * depth:
+        if random.choice([True, False]):
+            return TreeNode(random.choice(digits))
         else:
-            raise ValueError("Invalid character in the expression")
-
-    while len(stack) > 1:
-        right_operand = stack.pop()
-        operator = stack.pop()
-        left_operand = stack.pop()
-        node = TreeNode(operator)
-        node.left = left_operand
-        node.right = right_operand
-        stack.append(node)
-
-    if len(stack) != 1:
-        raise ValueError("Invalid expression")
-
-    return stack[0]
+            return TreeNode('x')
+    operator = random.choice(operators)
+    node = TreeNode(operator)
+    node.left = generate_random_tree(max_height, depth + 1)
+    node.right = generate_random_tree(max_height, depth + 1)
+    if node.left.value.isalnum() and node.right.value.isalnum():
+        if node.value == '**' or node.value in '+*':
+            node.left.value = 'x'
+            node.right.value = random.choice(digits)
+        elif node.value in '-/':
+            if random.choice([True, False]):
+                node.left.value = 'x'
+                node.right.value = random.choice(digits)
+            else:
+                node.left.value = random.choice(digits)
+                node.right.value = 'x'
+    return node
 
 def print_tree(root, level=0, prefix=""):
     if level == 0:
@@ -94,7 +58,10 @@ def evaluate(node, x):
             if node.value == '*':
                 return evaluate(node.left, x) * evaluate(node.right, x)
             if node.value == '/':
-                return evaluate(node.left, x) / evaluate(node.right, x)
+                right = evaluate(node.right, x)
+                if right == 0:
+                    return 0
+                return evaluate(node.left, x) / right
             if node.value == '**':
                 return evaluate(node.left, x) ** evaluate(node.right, x)
     return None
@@ -103,7 +70,7 @@ def mutate(expression_root, mutation_rate):
     if random.random() < mutation_rate:
         x = 0
     return expression_root
-tree = create_expression_tree('(x+2)*3)')
+
+tree = generate_random_tree(5)
 print_tree(tree)
-# result = evaluate(tree, 2)
-# print(result)
+# print(evaluate(tree, 1))
