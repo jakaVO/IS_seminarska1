@@ -25,6 +25,12 @@ def fitness_function(ga_instance, solution, solution_idx):
 n_trees = 98
 tree_height = 5
 trees = generate_trees(n_trees, tree_height)
+"""
+for i in range(10):
+    print(f'\n{i}.')
+    print_tree(trees[i])
+    print_expression(trees[i])
+"""
 
 # Create an instance of the pygad.GA class
 ga = pygad.GA(num_generations=50, 

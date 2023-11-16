@@ -21,9 +21,12 @@ def generate_random_tree(max_height, depth=0):
     operator = random.choice(operators)
     node = TreeNode(operator)
     node.left = generate_random_tree(max_height, depth + 1)
-    node.right = generate_random_tree(max_height, depth + 1)
+    if operator == '**':
+        node.right = TreeNode(random.choice(digits))
+    else:
+        node.right = generate_random_tree(max_height, depth + 1)
     if node.left.value.isalnum() and node.right.value.isalnum():
-        if node.value == '**' or node.value in '+*':
+        if node.value in '+*':
             node.left.value = 'x'
             node.right.value = random.choice(digits)
         elif node.value in '-/':
@@ -49,6 +52,24 @@ def print_tree(root, level=0, prefix=""):
     if root.left is not None or root.right is not None:
         print_tree(root.left, level + 1, "L: ")
         print_tree(root.right, level + 1, "R: ")
+
+def print_expression(node):
+    if node is not None:
+        if node.left is not None or node.right is not None:
+            if is_operator(node.value):
+                if node.value in ['+', '-']:
+                    print("(", end="")
+                print_expression(node.left)
+                print(node.value, end="")
+                print_expression(node.right)
+                if node.value in ['+', '-']:
+                    print(")", end="")
+            else:
+                print_expression(node.left)
+                print(node.value, end="")
+                print_expression(node.right)
+        else:
+            print(node.value, end="")
 
 def evaluate(node, x):
     if node != None:
@@ -77,6 +98,6 @@ def mutate(expression_root, mutation_rate):
         x = 0
     return expression_root
 
-tree = generate_random_tree(5)
-print_tree(tree)
+# tree = generate_random_tree(5)
+# print_tree(tree)
 # print(evaluate(tree, 1))
