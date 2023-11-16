@@ -25,13 +25,10 @@ max_base_population_tree_height = 1
 
 def fitness(expression):
     try:
-        predicted_y = []
+        predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
         print("fitness")
         print_expression(expression)
-        list_x = x_values.tolist()
-        for xi in list_x:
-            yi = evaluate(expression, int(xi))
-            predicted_y.append(yi)
+        
         mse = np.mean((np.array(predicted_y) - y_values) ** 2)
         print("mse: " + str(mse))
         return (1.0 / (mse + 1e-6), expression)  # Avoid division by zero
