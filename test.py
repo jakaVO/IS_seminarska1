@@ -5,12 +5,12 @@ import random
 solution = ""
 
 x_values = np.array([1, 2, 3])
-y_values = np.array([5, 6, 7])
+y_values = np.array([0, 510, 19680])
 
-population_size = 10
-max_generations = 2
+population_size = 100
+max_generations = 100
 mutation_rate = 1
-number_of_parents = 2
+number_of_parents = 10
 max_base_population_tree_height = 1
 
 def fitness(expression):
@@ -32,13 +32,9 @@ for generation in range(max_generations):
     # Select parents based on fitness scores (roulette wheel selection)
     selected_parents = sorted(fitness_scores, key=lambda x: x[0], reverse=True)[:number_of_parents]
 
-    print_tree(selected_parents[0][1])
-
     if fitness(selected_parents[0][1]) == 1000.0:
         population = selected_parents
         break
-
-    # print(selected_parents[0])
 
     # Create a new population through crossover and mutation
     new_population = [t[1] for t in selected_parents]
@@ -51,7 +47,7 @@ for generation in range(max_generations):
         # crossover_point = random.randint(1, len(parent1) - 1)
         # child = parent1[:crossover_point] + parent2[crossover_point:]
 
-        child = new_population[i]
+        child = tree_copy(new_population[i])
         
         # Apply mutation
         child = mutate(child, mutation_rate)
@@ -68,4 +64,4 @@ for generation in range(max_generations):
 best_individual = population[0]
 
 print("Best Equation:")
-print_tree(best_individual)
+print_expression(best_individual)

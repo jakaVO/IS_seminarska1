@@ -57,20 +57,24 @@ def print_tree(root, level=0, prefix=""):
         print_tree(root.right, level + 1, "R: ")
 
 def print_expression(node):
+    print_expression_rec(node)
+    print()
+
+def print_expression_rec(node):
     if node is not None:
         if node.left is not None or node.right is not None:
             if is_operator(node.value):
                 if node.value in ['+', '-']:
                     print("(", end="")
-                print_expression(node.left)
+                print_expression_rec(node.left)
                 print(node.value, end="")
-                print_expression(node.right)
+                print_expression_rec(node.right)
                 if node.value in ['+', '-']:
                     print(")", end="")
             else:
-                print_expression(node.left)
+                print_expression_rec(node.left)
                 print(node.value, end="")
-                print_expression(node.right)
+                print_expression_rec(node.right)
         else:
             print(node.value, end="")
 
@@ -97,17 +101,24 @@ def evaluate(node, x):
     return None
 
 def mutate(root, mutation_rate):
-    
+
+    print_expression(root)
+
     if root.value == "x" and root.left == None and root.right == None:
         return root
 
     nodes_array = nodes_to_array(root)
     nodes_mutated = []
     for i in range(mutation_rate):
-        if number_of_x_values(nodes_array) >= 2:
-            mutation_type = random.choice(["change_operator", "change_operand", "add_operation", "remove_operation"])
-        else:
+        number_of_x = number_of_x_values(nodes_array)
+        if number_of_x == len(nodes_array):
+            mutation_type = random.choice(["change_operator", "add_operation", "remove_operation"])
+        elif number_of_x >= 2:
             mutation_type = random.choice(["change_operator", "change_operand", "add_operation"])
+        elif len(nodes_array) == 1:
+            mutation_type = random.choice(["add_operation"])
+        else:
+            mutation_type = random.choice(["change_operator", "change_operand", "add_operation", "remove_operation"])
         # Filter nodes array based on mutation_type (example: if changing the operator, the selected node has to be operator => filter array to only include operator nodes)
         nodes_array_filtered = [x for x in nodes_array if
                         x not in nodes_mutated and
@@ -116,9 +127,7 @@ def mutate(root, mutation_rate):
                         mutation_type == "add_operation" and is_operand(x.value) or
                         mutation_type == "remove_operation" and is_operator(x.value) and (((x.left == None) or (x.left != None and x.left.left == None)) and ((x.right == None) or (x.right != None and x.right.right == None)))
                        ]
-        print_tree(root)
         print(mutation_type)
-        print(len(nodes_array))
         print(len(nodes_array_filtered))
         random_node = random.choice(nodes_array_filtered)
         if mutation_type == "change_operator":
@@ -139,22 +148,34 @@ def mutate(root, mutation_rate):
         
         nodes_mutated.append(random_node)
         
+    print_expression(root)
+
     return root
+
+def tree_copy(root):
+    if root is None:
+        return None
+
+    new_root = TreeNode(root.value)
+    new_root.left = tree_copy(root.left)
+    new_root.right = tree_copy(root.right)
+
+    return new_root
 
 def number_of_x_values(arr):
     return len([x for x in arr if x.value == "x"])
 
 def nodes_to_array(root, arr = []):
-    if root != None:
-        arr.append(root)
-        if root.left != None:
-            nodes_to_array(root.left, arr)
-        if root.right != None:
-            nodes_to_array(root.right, arr)
-    return arr
+    def in_order_traversal(node, result):
+        if node is not None:
+            in_order_traversal(node.left, result)
+            result.append(node)
+            in_order_traversal(node.right, result)
 
-# tree = generate_random_tree(2)
-# nodes = nodes_to_array(tree)
-# print_tree(tree)
-# mutate(tree, mutation_rate=2)
-# print_tree(tree)
+    result = []
+    in_order_traversal(root, result)
+    return result
+
+tree = generate_random_tree(3)
+print_expression(tree)
+print_tree(tree)
