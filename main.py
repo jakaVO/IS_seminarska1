@@ -13,7 +13,7 @@ y = np.array([2, 4, 6])
 def fitness_function(ga_instance, solution, solution_idx):
 
     expression = f"lambda x: {solution}"
-    print(expression)
+    #print(expression)
     try:
         function = eval(expression)
         predicted_y = [function(xi) for xi in x]
@@ -32,12 +32,25 @@ for i in range(10):
     print_expression(trees[i])
 """
 
+parent1 = trees[0]
+parent2 = trees[1]
+arr = nodes_to_array(parent1)
+print()
+print_expression(parent1)
+print()
+print_expression(parent2)
+print()
+child1, child2 = crossover(parent1, parent2)
+print_expression(child1)
+print()
+
+
 # Create an instance of the pygad.GA class
-ga = pygad.GA(num_generations=50, 
+""" ga = pygad.GA(num_generations=50, 
              num_parents_mating=10, 
              fitness_func=fitness_function, 
              sol_per_pop=20, 
-             num_genes=len("a*x"))
+             num_genes=len("a*x")) """
 
 # Run the genetic algorithm
 # ga.run()

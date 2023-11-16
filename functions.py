@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 operators = ['+', '-', '*', '/', '**']
@@ -162,7 +163,7 @@ def tree_copy(root):
 def number_of_x_values(arr):
     return len([x for x in arr if x.value == "x"])
 
-def nodes_to_array(root, arr = []):
+def nodes_to_array(root):
     def in_order_traversal(node, result):
         if node is not None:
             in_order_traversal(node.left, result)
@@ -174,4 +175,48 @@ def nodes_to_array(root, arr = []):
     return result
 
 tree = generate_random_tree(10)
-print_expression(tree)
+#print_expression(tree)
+def is_operand(node):
+    return node.value.isdigit() or node.value in {'+', '-', '*', '**', '/'}
+
+def crossover(parent1, parent2):
+    # Deep copy the parents to avoid modifying them directly
+    child1 = deepcopy(parent1)
+    child2 = deepcopy(parent2)
+
+    # Select a random operand node from each parent for crossover
+    crossover_point1 = select_random_operand_node(child1)
+    crossover_point2 = select_random_operand_node(child2)
+
+    # Swap subtrees between the two parents at the crossover points
+    swap_subtrees(child1, crossover_point1, parent2, crossover_point2)
+    swap_subtrees(child2, crossover_point2, parent1, crossover_point1)
+
+    return child1, child2
+
+def select_random_operand_node(root):
+    # Helper function to select a random operand node in the tree
+    nodes = []
+
+    def traverse(node):
+        if is_operand(node):
+            nodes.append(node)
+        if node.left:
+            traverse(node.left)
+        if node.right:
+            traverse(node.right)
+
+    traverse(root)
+    return random.choice(nodes)
+
+def swap_subtrees(parent1, node1, parent2, node2):
+    # Helper function to swap subtrees between two parents at specified nodes
+    if parent1.left == node1:
+        parent1.left = node2
+    elif parent1.right == node1:
+        parent1.right = node2
+
+    if parent2.left == node2:
+        parent2.left = node1
+    elif parent2.right == node2:
+        parent2.right = node1
