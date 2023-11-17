@@ -43,6 +43,8 @@ print()
 child1, child2 = crossover(parent1, parent2)
 print_expression(child1)
 print()
+print_expression(child2)
+print()
 
 
 # Create an instance of the pygad.GA class
@@ -55,7 +57,7 @@ print()
 # Run the genetic algorithm
 # ga.run()
 
-df = pd.read_csv("data.txt")
+#df = pd.read_csv("data.txt")
 # print(df)
 
 # Define a function to parse expressions and build expression trees

@@ -202,16 +202,45 @@ def select_random_operand_node(root):
             traverse(node.right)
 
     traverse(root)
-    return random.choice(nodes)
 
+    # Select a random node within the specified range (35%-75% of the length)
+    min_index = max(0, len(nodes) * 35 // 100)
+    max_index = min(len(nodes) * 75 // 100, len(nodes) - 1)
+
+    return random.choice(nodes[min_index:max_index + 1])
+
+
+""" def swap_subtrees(parent1, node1, parent2, node2):
+    # Helper function to swap subtrees between two parents at specified nodes
+    if parent1.left and parent1.left.value == node1.value:
+        parent1.left = deepcopy(node2)
+    elif parent1.right and parent1.right.value == node1.value:
+        parent1.right = deepcopy(node2)
+
+    if parent2.left and parent2.left.value == node2.value:
+        parent2.left = deepcopy(node1)
+    elif parent2.right and parent2.right.value == node2.value:
+        parent2.right = deepcopy(node1)
+ """
 def swap_subtrees(parent1, node1, parent2, node2):
     # Helper function to swap subtrees between two parents at specified nodes
-    if parent1.left == node1:
-        parent1.left = node2
-    elif parent1.right == node1:
-        parent1.right = node2
+    if parent1.left and parent1.left.value == node1.value:
+        parent1.left = clone_tree(node2)
+    elif parent1.right and parent1.right.value == node1.value:
+        parent1.right = clone_tree(node2)
 
-    if parent2.left == node2:
-        parent2.left = node1
-    elif parent2.right == node2:
-        parent2.right = node1
+    if parent2.left and parent2.left.value == node2.value:
+        parent2.left = clone_tree(node1)
+    elif parent2.right and parent2.right.value == node2.value:
+        parent2.right = clone_tree(node1)
+
+def clone_tree(root):
+    # Helper function to clone a tree
+    if not root:
+        return None
+
+    new_node = TreeNode(root.value)
+    new_node.left = clone_tree(root.left)
+    new_node.right = clone_tree(root.right)
+
+    return new_node
