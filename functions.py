@@ -54,7 +54,7 @@ def generate_random_tree(max_height, depth=0):
             node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
         if operator != 'sin' and operator != 'cos':
             node.right = generate_random_tree(max_height, depth + 1)
-            if node.left.value.isalnum() and node.right.value.isalnum():
+            if node.left.value in digits + ['x', 'e'] and node.right.value in digits + ['x', 'e']:
                 if node.value in '+*':
                     node.left.value = 'x'
                     node.right.value = random.choice(digits)
@@ -117,25 +117,32 @@ def print_expressions(arr, new = True):
     else:
         print("]")
 
-def print_expression(node):
-    print_expression_rec(node)
-    print()
-
 def print_expression_rec(node):
-    if node is not None:
-        if node.left is not None or node.right is not None:
-            if is_operator(node.value):
-                if node.value in ['+', '-', '*', '/', '**']:
-                    print("(", end="")
-                print_expression_rec(node.left)
-                print(node.value, end="")
-                print_expression_rec(node.right)
-                if node.value in ['+', '-', '*', '/', '**']:
-                    print(")", end="")
-            else:
-                print_expression_rec(node.left)
-                print(node.value, end="")
-                print_expression_rec(node.right)
+    if complex_expressions and node is not None:
+        if node.value == 'sin' or node.value == 'cos':
+            print(node.value, end="(")
+            print_expression_rec(node.left)
+            print(")", end="")
+        elif node.value == 'log':
+            print_expression_rec(node.right)
+            print(node.value, end="(")
+            print_expression_rec(node.left)
+            print(")", end="")
+        elif is_operator(node.value):
+            print("(", end="")
+            print_expression_rec(node.left)
+            print(node.value, end="")
+            print_expression_rec(node.right)
+            print(")", end="")
+        else:
+            print(node.value, end="")
+    elif node is not None:
+        if is_operator(node.value):
+            print("(", end="")
+            print_expression_rec(node.left)
+            print(node.value, end="")
+            print_expression_rec(node.right)
+            print(")", end="")
         else:
             print(node.value, end="")
 
@@ -319,13 +326,16 @@ def clone_tree(node):
 
     return new_node
 
-
-tree1 = generate_random_tree(5)
-tree2 = generate_random_tree(5)
-chld1 = crossover(tree1, tree2)
+tree = generate_random_tree(5)
+print_tree(tree)
+print_expression_rec(tree)
+print(evaluate(tree, 10))
+# tree1 = generate_random_tree(5)
+# tree2 = generate_random_tree(5)
+# chld1 = crossover(tree1, tree2)
 #print_tree(tree)
-print_expression(tree1)
-print_expression(tree2)
-print_expression(chld1)
+# print_expression(tree1)
+# print_expression(tree2)
+# print_expression(chld1)
 
 #print(evaluate(tree, 1))
