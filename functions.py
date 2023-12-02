@@ -1,8 +1,14 @@
 import random
+import numpy as np
+import math
 from copy import deepcopy
 
+complex_expressions = True
+
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
-operators = ['+', '-', '*', '/', '**']
+operators = ['+', '-', '*', '/', '**'] # Operators with both left and right child
+operatorsC = ['log'] # Complex operators (log: left - expression, right - base)
+trigonometric = ['sin', 'cos'] # Trigonometric operators, only have left child
 
 class TreeNode:
     def __init__(self, value):
@@ -13,34 +19,66 @@ class TreeNode:
 def is_operator(char):
     return char in operators
 
+def is_operatorC(char):
+    return char in operatorsC + trigonometric
+
 def is_operand(char):
     return char in digits
+
+def log_with_base(x, base):
+    if math.log(base) == 0:
+        return 0
+    return math.log(x) / math.log(base)
 
 def generate_random_tree(max_height, depth=0):
     if random.random() < (1 / max_height) * depth:
         if random.choice([True, False]):
             return TreeNode(random.choice(digits))
         else:
-            return TreeNode('x')
-    operator = random.choice(operators)
-    node = TreeNode(operator)
-    node.left = generate_random_tree(max_height, depth + 1)
-    if operator == '**':
-        node.right = TreeNode(random.choice(digits))
+            if complex_expressions:
+                return TreeNode(random.choice(['x', 'e']))
+            else:
+                return TreeNode('x')
+    if complex_expressions:
+        operator = random.choice(operators + operatorsC + trigonometric)
+        node = TreeNode(operator)
+        node.left = generate_random_tree(max_height, depth + 1)
+        if operator == 'log':
+            node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
+        if operator != 'sin' and operator != 'cos':
+            node.right = generate_random_tree(max_height, depth + 1)
+            if node.left.value.isalnum() and node.right.value.isalnum():
+                if node.value in '+*':
+                    node.left.value = 'x'
+                    node.right.value = random.choice(digits)
+                elif node.value in '-/':
+                    if random.choice([True, False]):
+                        node.left.value = random.choice(['x', 'e'])
+                        node.right.value = random.choice(digits)
+                    else:
+                        node.left.value = random.choice(digits)
+                        node.right.value = random.choice(['x', 'e'])
+        return node
     else:
-        node.right = generate_random_tree(max_height, depth + 1)
-    if node.left.value.isalnum() and node.right.value.isalnum():
-        if node.value in '+*':
-            node.left.value = 'x'
-            node.right.value = random.choice(digits)
-        elif node.value in '-/':
-            if random.choice([True, False]):
+        operator = random.choice(operators)
+        node = TreeNode(operator)
+        node.left = generate_random_tree(max_height, depth + 1)
+        if operator == '**':
+            node.right = TreeNode(random.choice(digits))
+        else:
+            node.right = generate_random_tree(max_height, depth + 1)
+        if node.left.value.isalnum() and node.right.value.isalnum():
+            if node.value in '+*':
                 node.left.value = 'x'
                 node.right.value = random.choice(digits)
-            else:
-                node.left.value = random.choice(digits)
-                node.right.value = 'x'
-    return node
+            elif node.value in '-/':
+                if random.choice([True, False]):
+                    node.left.value = 'x'
+                    node.right.value = random.choice(digits)
+                else:
+                    node.left.value = random.choice(digits)
+                    node.right.value = 'x'
+        return node
 
 def generate_trees(n, height):
     trees = [TreeNode(None) for _ in range(n)]
@@ -53,8 +91,9 @@ def print_tree(root, level=0, prefix=""):
         print(prefix + str(root.value))
     else:
         print(" " * (level * 3) + prefix + str(root.value))
-    if root.left is not None or root.right is not None:
+    if root.left is not None:
         print_tree(root.left, level + 1, "L: ")
+    if root.right is not None:
         print_tree(root.right, level + 1, "R: ")
 
 def print_expression(node):
@@ -81,24 +120,38 @@ def print_expression_rec(node):
 
 def evaluate(node, x):
     if node != None:
-        if node.value.isalnum():
+        if node.value in digits + ['x', 'e']:
             if node.value == 'x':
                 return x
+            elif complex_expressions and node.value == 'e':
+                return np.e
             return int(node.value)
-        if is_operator(node.value):
+        elif is_operator(node.value):
             if node.value == '+':
                 return evaluate(node.left, x) + evaluate(node.right, x)
-            if node.value == '-':
+            elif node.value == '-':
                 return evaluate(node.left, x) - evaluate(node.right, x)
-            if node.value == '*':
+            elif node.value == '*':
                 return evaluate(node.left, x) * evaluate(node.right, x)
-            if node.value == '/':
+            elif node.value == '/':
                 right = evaluate(node.right, x)
                 if right == 0:
                     return 0
                 return evaluate(node.left, x) / right
-            if node.value == '**':
+            elif node.value == '**':
                 return evaluate(node.left, x) ** evaluate(node.right, x)
+        elif is_operatorC(node.value):
+            if node.value == 'log':
+                base = evaluate(node.right, x)
+                if base <= 0:
+                    return 0
+                return log_with_base(evaluate(node.left, x), base)
+            elif node.value == 'sin':
+                angle = math.radians(evaluate(node.left, x))
+                return math.sin(angle)
+            elif node.value == 'cos':
+                angle = math.radians(evaluate(node.left, x))
+                return math.cos(angle)
     return None
 
 def mutate(root, mutation_rate):
@@ -244,3 +297,7 @@ def clone_tree(root):
     new_node.right = clone_tree(root.right)
 
     return new_node
+
+tree = generate_random_tree(5)
+print_tree(tree)
+print(evaluate(tree, 1))
