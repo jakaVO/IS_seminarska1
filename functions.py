@@ -3,7 +3,7 @@ import numpy as np
 import math
 from copy import deepcopy
 
-complex_expressions = True
+complex_expressions = False
 invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -259,80 +259,73 @@ def nodes_to_array(root):
 
 tree = generate_random_tree(10)
 #print_expression(tree)
-def is_operand(node):
-    return node.value.isdigit() or node.value in {'+', '-', '*', '**', '/'}
+def flatten_tree(node):
+    if node is None:
+        return []
+    return flatten_tree(node.left) + [node] + flatten_tree(node.right)
 
 def crossover(parent1, parent2):
-    # Deep copy the parents to avoid modifying them directly
-    child1 = deepcopy(parent1)
-    child2 = deepcopy(parent2)
+    flat_parent1 = flatten_tree(parent1)
+    flat_parent2 = flatten_tree(parent2)
 
-    # Select a random operand node from each parent for crossover
-    crossover_point1 = select_random_operand_node(child1)
-    crossover_point2 = select_random_operand_node(child2)
+    # Determine the crossover point (random index between 30% and 70% of the shorter array)
+    min_length = min(len(flat_parent1), len(flat_parent2))
+    crossover_point = random.randint(min_length * 3 // 10, min_length * 7 // 10)
+    print("CROSSOVER POINT___", crossover_point)
 
-    # Swap subtrees between the two parents at the crossover points
-    swap_subtrees(child1, crossover_point1, parent2, crossover_point2)
-    swap_subtrees(child2, crossover_point2, parent1, crossover_point1)
+    # Create a set to keep track of unique values in the child tree
+    unique_values = set()
 
-    return child1, child2
+    # Create an array of nodes by combining nodes from parent1 up to the crossover point and parent2 after the crossover point
+    child_nodes = []
 
-def select_random_operand_node(root):
-    # Helper function to select a random operand node in the tree
-    nodes = []
+    if crossover_point < len(flat_parent1):
+        for node in flat_parent1[:crossover_point + 1]:
+            if node.value not in unique_values:
+                child_nodes.append(node)
+                unique_values.add(node.value)
 
-    def traverse(node):
-        if is_operand(node):
-            nodes.append(node)
-        if node.left:
-            traverse(node.left)
-        if node.right:
-            traverse(node.right)
+    if crossover_point < len(flat_parent2):
+        for node in flat_parent2[crossover_point + 1:]:
+            if node.value not in unique_values:
+                child_nodes.append(node)
+                unique_values.add(node.value)
 
-    traverse(root)
+    # Construct the child tree from the array of nodes
+    child_tree = construct_tree_from_nodes(child_nodes)
 
-    # Select a random node within the specified range (35%-75% of the length)
-    min_index = max(0, len(nodes) * 35 // 100)
-    max_index = min(len(nodes) * 75 // 100, len(nodes) - 1)
+    return child_tree
 
-    return random.choice(nodes[min_index:max_index + 1])
-
-
-""" def swap_subtrees(parent1, node1, parent2, node2):
-    # Helper function to swap subtrees between two parents at specified nodes
-    if parent1.left and parent1.left.value == node1.value:
-        parent1.left = deepcopy(node2)
-    elif parent1.right and parent1.right.value == node1.value:
-        parent1.right = deepcopy(node2)
-
-    if parent2.left and parent2.left.value == node2.value:
-        parent2.left = deepcopy(node1)
-    elif parent2.right and parent2.right.value == node2.value:
-        parent2.right = deepcopy(node1)
- """
-def swap_subtrees(parent1, node1, parent2, node2):
-    # Helper function to swap subtrees between two parents at specified nodes
-    if parent1.left and parent1.left.value == node1.value:
-        parent1.left = clone_tree(node2)
-    elif parent1.right and parent1.right.value == node1.value:
-        parent1.right = clone_tree(node2)
-
-    if parent2.left and parent2.left.value == node2.value:
-        parent2.left = clone_tree(node1)
-    elif parent2.right and parent2.right.value == node2.value:
-        parent2.right = clone_tree(node1)
-
-def clone_tree(root):
-    # Helper function to clone a tree
-    if not root:
+def construct_tree_from_nodes(nodes):
+    if not nodes:
         return None
 
-    new_node = TreeNode(root.value)
-    new_node.left = clone_tree(root.left)
-    new_node.right = clone_tree(root.right)
+    root = clone_tree(nodes[0])
+    current_node = root
+
+    for node in nodes[1:]:
+        current_node.right = clone_tree(node)
+        current_node = current_node.right
+
+    return root
+
+def clone_tree(node):
+    if node is None:
+        return None
+
+    new_node = TreeNode(node.value)
+    new_node.left = clone_tree(node.left)
+    new_node.right = clone_tree(node.right)
 
     return new_node
 
-tree = generate_random_tree(5)
-print_tree(tree)
-print(evaluate(tree, 1))
+
+tree1 = generate_random_tree(5)
+tree2 = generate_random_tree(5)
+chld1 = crossover(tree1, tree2)
+#print_tree(tree)
+print_expression(tree1)
+print_expression(tree2)
+print_expression(chld1)
+
+#print(evaluate(tree, 1))
