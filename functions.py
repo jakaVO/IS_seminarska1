@@ -3,7 +3,8 @@ import numpy as np
 import math
 from copy import deepcopy
 
-complex_expressions = True
+complex_expressions = False
+invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 operators = ['+', '-', '*', '/', '**'] # Operators with both left and right child
@@ -26,11 +27,17 @@ def is_operand(char):
     return char in digits
 
 def log_with_base(x, base):
+    global invalid_expression
     if math.log(base) == 0:
+        invalid_expression = True
+        return 0
+    if x <= 0:
+        invalid_expression = True
         return 0
     return math.log(x) / math.log(base)
 
 def generate_random_tree(max_height, depth=0):
+    global complex_expressions
     if random.random() < (1 / max_height) * depth:
         if random.choice([True, False]):
             return TreeNode(random.choice(digits))
@@ -81,8 +88,10 @@ def generate_random_tree(max_height, depth=0):
         return node
 
 def generate_trees(n, height):
+    global invalid_expression
     trees = [TreeNode(None) for _ in range(n)]
     for i in range(n):
+        invalid_expression = False
         trees[i] = generate_random_tree(height)
     return trees
 
@@ -131,6 +140,10 @@ def print_expression_rec(node):
             print(node.value, end="")
 
 def evaluate(node, x):
+    global invalid_expression
+    global complex_expressions
+    if invalid_expression:
+        return 0
     if node != None:
         if node.value in digits + ['x', 'e']:
             if node.value == 'x':
@@ -151,7 +164,11 @@ def evaluate(node, x):
                     return 0
                 return evaluate(node.left, x) / right
             elif node.value == '**':
-                return evaluate(node.left, x) ** evaluate(node.right, x)
+                base = evaluate(node.left, x)
+                if base < 0:
+                    invalid_expression = True
+                    return 0
+                return base ** evaluate(node.right, x)
         elif is_operatorC(node.value):
             if node.value == 'log':
                 base = evaluate(node.right, x)
