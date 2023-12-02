@@ -25,12 +25,12 @@ y_values = np.array(eval(y_values))
 # plt.show()
 
 
-population_size = 1000
-max_generations = 2000
+population_size = 10
+max_generations = 20
 mutation_rate = 1
 number_of_parents = 3
 max_base_population_tree_height = 1
-debugging_mode = False # For printing out results of various functions during the code run
+debugging_mode = True # For printing out results of various functions during the code run
 
 def fitness(expression):
     try:
@@ -39,7 +39,23 @@ def fitness(expression):
         for i in range(len(y_values)):
             if (predicted_y[i] - y_values[i] > 10000000):
                 continue
-            dif_squared = np.power((predicted_y[i] - y_values[i]), 2)
+            dif_squared = np.power((np.log(predicted_y[i]) - np.log(y_values[i])), 2)
+            dif_squared_arr.append(dif_squared)
+        mse = np.mean(np.array(dif_squared_arr))
+        return (1.0 / (mse + 1e-6), expression)  # Avoid division by zero
+    except Exception as e:
+        return (0.0, expression)  # Return a low fitness for invalid expressions
+    
+def fitness2(expression):
+    try:
+        predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+        dif_squared_arr = []
+        for i in range(len(y_values) - 1):
+            if (predicted_y[i] - y_values[i] > 10000000):
+                continue
+            predicted_dif = predicted_y[i + 1] - predicted_y[i]
+            actual_dif    = y_values[i + 1] - y_values[i]
+            dif_squared = np.power((np.log(predicted_dif) - np.log(actual_dif)), 2)
             dif_squared_arr.append(dif_squared)
         mse = np.mean(np.array(dif_squared_arr))
         return (1.0 / (mse + 1e-6), expression)  # Avoid division by zero
@@ -53,7 +69,7 @@ if debugging_mode:
     print_expressions(population)
 
 for generation in range(max_generations):
-    fitness_scores = [fitness(individual) for individual in population]
+    fitness_scores = [fitness2(individual) for individual in population]
 
     selected_parents = sorted(fitness_scores, key=lambda x: x[0], reverse=True)[:number_of_parents]
 
