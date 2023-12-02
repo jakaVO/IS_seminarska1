@@ -96,6 +96,18 @@ def print_tree(root, level=0, prefix=""):
     if root.right is not None:
         print_tree(root.right, level + 1, "R: ")
 
+def print_expressions(arr, new = True):
+    if new:
+        print("[", end="")
+    print("\"", end="")
+    print_expression_rec(arr[0])
+    print("\"", end="")
+    if len(arr) > 1:
+        print(", ", end="")
+        print_expressions(arr[1:], False)
+    else:
+        print("]")
+
 def print_expression(node):
     print_expression_rec(node)
     print()
@@ -104,12 +116,12 @@ def print_expression_rec(node):
     if node is not None:
         if node.left is not None or node.right is not None:
             if is_operator(node.value):
-                if node.value in ['+', '-']:
+                if node.value in ['+', '-', '*', '/', '**']:
                     print("(", end="")
                 print_expression_rec(node.left)
                 print(node.value, end="")
                 print_expression_rec(node.right)
-                if node.value in ['+', '-']:
+                if node.value in ['+', '-', '*', '/', '**']:
                     print(")", end="")
             else:
                 print_expression_rec(node.left)
@@ -156,6 +168,8 @@ def evaluate(node, x):
 
 def mutate(root, mutation_rate):
 
+    # print("Pred mutacijo: ")
+    # print_expression(root)
     nodes_array = nodes_to_array(root)
     nodes_mutated = []
     for i in range(mutation_rate):
@@ -173,7 +187,7 @@ def mutate(root, mutation_rate):
                         x not in nodes_mutated and
                         mutation_type == "change_operator" and is_operator(x.value) or
                         mutation_type == "change_operand" and is_operand(x.value) or
-                        mutation_type == "add_operation" and is_operand(x.value) or
+                        mutation_type == "add_operation" and (is_operand(x.value) or x.value == "x") or
                         mutation_type == "remove_operation" and is_operator(x.value) and (((x.left == None) or (x.left != None and x.left.left == None)) and ((x.right == None) or (x.right != None and x.right.right == None)))
                        ]
         if len(nodes_array_filtered) > 0:
@@ -196,6 +210,10 @@ def mutate(root, mutation_rate):
             
             nodes_mutated.append(random_node)
 
+    # print("Po: ")
+    # print_expression(root)
+    if number_of_x_values(nodes_to_array(root)) == 0:
+        return mutate(root, mutation_rate)
     return root
 
 def tree_copy(root):
