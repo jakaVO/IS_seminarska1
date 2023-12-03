@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import math
-from copy import deepcopy
+import copy
 from sympy import sympify, simplify
 
 complex_expressions = True
@@ -298,59 +298,55 @@ def flatten_tree(node):
     return flatten_tree(node.left) + [node] + flatten_tree(node.right)
 
 def crossover(parent1, parent2):
-    flat_parent1 = flatten_tree(parent1)
-    flat_parent2 = flatten_tree(parent2)
+    # Create deep copies of the parents to avoid modifying them directly
+    child1 = copy.deepcopy(parent1)
+    child2 = copy.deepcopy(parent2)
 
-    # Determine the crossover point (random index between 30% and 70% of the shorter array)
-    min_length = min(len(flat_parent1), len(flat_parent2))
-    crossover_point = random.randint(min_length * 3 // 10, min_length * 7 // 10)
-    print("CROSSOVER POINT___", crossover_point)
+    # Select a non-root node from parent1
+    parent1_node = get_random_non_root_node(parent1)
+    # Select a non-root node from parent2
+    parent2_node = get_random_non_root_node(parent2)
 
-    # Create a set to keep track of unique values in the child tree
-    unique_values = set()
+    # Swap the selected nodes and their descendants
+    swap_nodes(child1, parent1_node, parent2_node)
 
-    # Create an array of nodes by combining nodes from parent1 up to the crossover point and parent2 after the crossover point
-    child_nodes = []
+    # Swap the selected nodes and their descendants in the second child
+    swap_nodes(child2, parent2_node, parent1_node)
 
-    if crossover_point < len(flat_parent1):
-        for node in flat_parent1[:crossover_point + 1]:
-            if node.value not in unique_values:
-                child_nodes.append(node)
-                unique_values.add(node.value)
+    return child1, child2
 
-    if crossover_point < len(flat_parent2):
-        for node in flat_parent2[crossover_point + 1:]:
-            if node.value not in unique_values:
-                child_nodes.append(node)
-                unique_values.add(node.value)
+def get_random_non_root_node(tree):
+    # Get a list of all non-root nodes in the tree
+    non_root_nodes = get_non_root_nodes(tree)
 
-    # Construct the child tree from the array of nodes
-    child_tree = construct_tree_from_nodes(child_nodes)
+    # Select a random non-root node
+    return random.choice(non_root_nodes)
 
-    return child_tree
+def get_non_root_nodes(node):
+    # Helper function to get a list of all non-root nodes in the tree
+    non_root_nodes = []
+    if node.left:
+        non_root_nodes.append(node.left)
+        non_root_nodes.extend(get_non_root_nodes(node.left))
+    if node.right:
+        non_root_nodes.append(node.right)
+        non_root_nodes.extend(get_non_root_nodes(node.right))
+    return non_root_nodes
 
-def construct_tree_from_nodes(nodes):
-    if not nodes:
-        return None
+def swap_nodes(tree, node1, node2):
+    # Helper function to swap two nodes and their descendants in the tree
+    if tree is None:
+        return
 
-    root = clone_tree(nodes[0])
-    current_node = root
-
-    for node in nodes[1:]:
-        current_node.right = clone_tree(node)
-        current_node = current_node.right
-
-    return root
-
-def clone_tree(node):
-    if node is None:
-        return None
-
-    new_node = TreeNode(node.value)
-    new_node.left = clone_tree(node.left)
-    new_node.right = clone_tree(node.right)
-
-    return new_node
+    if tree == node1:
+        # Replace node1 with a deep copy of node2
+        tree.value = node2.value
+        tree.left = copy.deepcopy(node2.left)
+        tree.right = copy.deepcopy(node2.right)
+    else:
+        # Recursively swap nodes in the left and right subtrees
+        swap_nodes(tree.left, node1, node2)
+        swap_nodes(tree.right, node1, node2)
 
 def expressionsAreRepeating(population):
     for i in range(len(population)):
@@ -375,10 +371,10 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
-tree = generate_random_tree(5)
+""" tree = generate_random_tree(5)
 print_tree(tree)
 print_expression_rec(tree)
-#print(evaluate(tree, 5))
+#print(evaluate(tree, 5)) """
 
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
@@ -397,7 +393,7 @@ predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 print(predicted_y)
 """
 
-tree1 = generate_random_tree(5)
+""" tree1 = generate_random_tree(5)
 tree2 = generate_random_tree(5)
 arrT1 = nodes_to_array(tree1)
 s = ""
@@ -408,4 +404,16 @@ simp = sympify(s)
 simp1 = simplify(simp)
 print_expression_rec(tree1)
 print()
-print("Simplified expression:", simp1)
+print("Simplified expression:", simp1) """
+
+tree1 = generate_random_tree(5)
+tree2 = generate_random_tree(5)
+chld1, chld2 = crossover(tree1, tree2)
+
+print_expression_rec(tree1)
+print()
+print_expression_rec(tree2)
+print()
+print_expression_rec(chld1)
+print()
+print_expression_rec(chld2)
