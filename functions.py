@@ -417,14 +417,59 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
-tree = generate_random_tree(3)
+
+def expression_to_string_rec(node):
+    result = ""
+    if complex_expressions and node is not None:
+        if node.value == 'sin' or node.value == 'cos':
+            result += node.value + "("
+            result += expression_to_string_rec(node.left)
+            result += ")"
+        elif node.value == 'log':
+            result += "log("
+            result += expression_to_string_rec(node.left)
+            result += ", "
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        elif is_operator(node.value):
+            result += "("
+            result += expression_to_string_rec(node.left)
+            result += node.value
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        else:
+            result += node.value
+    elif node is not None:
+        if is_operator(node.value):
+            result += "("
+            result += expression_to_string_rec(node.left)
+            result += node.value
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        else:
+            result += node.value
+    return result
+
+def simplify_tree(tree_to_simp):
+    s = expression_to_string_rec(tree_to_simp)
+    simp = sympify(s)
+    simp1 = simplify(simp)
+    print("Normal expression", s)
+    print("Simplified expression:", simp1)
+
+
+tree11 = generate_random_tree(5)
+simplify_tree(tree11)
+
+
+""" tree = generate_random_tree(3)
 print_tree(tree)
 print_expression_rec(tree)
 print()
 mutated = mutate(tree, 1)
 print_tree(mutated)
 print_expression_rec(mutated)
-print()
+print() """
 
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
