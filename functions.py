@@ -5,7 +5,7 @@ import copy
 from sympy import sympify, simplify
 
 complex_expressions = True
-invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
+invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers, negative value in log...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 operators = ['+', '-', '*', '/', '**'] # Operators with both left and right child
