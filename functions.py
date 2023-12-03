@@ -16,6 +16,24 @@ class TreeNode:
         self.value = str(value)
         self.left = None
         self.right = None
+        
+    def __eq__(self, other):
+        # Check if both nodes are None (base case)
+        if self is None and other is None:
+            return True
+        # Check if one node is None and the other is not (different structure)
+        if (self is None and other is not None) or (self is not None and other is None):
+            return False
+        # Compare values and recursively compare left and right subtrees
+        return (
+            self.value == other.value and
+            self.left == other.left and
+            self.right == other.right
+        )
+    
+    def __hash__(self):
+        # Convert the tree structure into a hashable representation (tuple)
+        return hash((self.value, self.left, self.right))
 
 def is_operator(char):
     return char in operators
@@ -150,6 +168,7 @@ def evaluate(node, x):
     global invalid_expression
     global complex_expressions
     if invalid_expression:
+        invalid_expression = False
         return 0
     if node != None:
         if node.value in digits + ['x', 'e']:
@@ -196,7 +215,7 @@ def mutate(root, mutation_rate):
     # print_expression(root)
     nodes_array = nodes_to_array(root)
     nodes_mutated = []
-    for i in range(mutation_rate):
+    if random.random() < mutation_rate:
         number_of_x = number_of_x_values(nodes_array)
         if number_of_x == len(nodes_array):
             mutation_type = random.choice(["change_operator", "add_operation", "remove_operation"])
@@ -326,16 +345,41 @@ def clone_tree(node):
 
     return new_node
 
-tree = generate_random_tree(5)
-print_tree(tree)
-print_expression_rec(tree)
-print(evaluate(tree, 10))
-# tree1 = generate_random_tree(5)
-# tree2 = generate_random_tree(5)
-# chld1 = crossover(tree1, tree2)
-#print_tree(tree)
-# print_expression(tree1)
-# print_expression(tree2)
-# print_expression(chld1)
+def expressionsAreRepeating(population):
+    for i in range(len(population)):
+        for j in range(len(population)):
+            if isEqual(population[i], population[j]):
+                return True   
+    return False
+            
+def isEqual(e1, e2):
+    if e1 == None and e2 == None:
+        return True
+    if (e1.value != e2.value):
+        return False
+    return isEqual(e1.left, e2.left) and isEqual(e1.right, e2.right)
 
-#print(evaluate(tree, 1))
+def uniqueExpressions(population):
+    expressions = [x[1] for x in population]
+    for i in range(len(expressions)):
+        for j in range(len(expressions)):
+            if isEqual(expressions[i], expressions[j]):
+                del population[j]
+                return uniqueExpressions(population)
+    return population
+
+# tree1 = generate_random_tree(25)
+# tree2 = tree_copy(tree1)
+# population = [tree1, tree2]
+# if expressionsAreRepeating(population):
+#     population = population[:-1]
+
+# print(len(population))
+
+expression = generate_random_tree(1)
+x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+print(predicted_y)
