@@ -79,7 +79,3 @@ def parse_expression(expression_str):
 # Get the best solution found by the genetic algorithm
 # best_solution = ga.best_solution()
 #3 print(best_solution)
-
-
-# print("main branch zacni delat")
-# print("Raztegnu ti bom supak")
