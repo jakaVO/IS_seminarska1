@@ -1,7 +1,11 @@
 import random
 import numpy as np
 import math
+<<<<<<< HEAD
 import copy
+=======
+from copy import deepcopy
+>>>>>>> 356f79d (izboljsave)
 from sympy import sympify, simplify
 
 complex_expressions = True
@@ -310,8 +314,9 @@ def mutate(root, mutation_rate):
 
     # print("Po: ")
     # print_expression(root)
-    # if number_of_x_values(nodes_to_array(root)) == 0:
-    #     return mutate(root, mutation_rate)
+    if number_of_x_values(nodes_to_array(root)) == 0:
+        # return mutate(root, mutation_rate)
+        invalid_expression = True
     return root
 
 def tree_copy(root):
