@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 
 solution = ""
 
-row_index = 27
+row_index = 30
 df = pd.read_csv("data.csv")
 x_values = df["Xs"].iloc[row_index]
 y_values = df["Ys"].iloc[row_index]
@@ -23,23 +23,30 @@ all_mutation_rates = []
 fresh_parents_to_add = 0
 
 fitness_weight = 0.05
-population_size = 100
+population_size = 250
 max_generations = 2500
 mutation_rate = 0.2
-number_of_parents = 50
+number_of_parents = 100
 max_base_population_tree_height = 1
 debugging_mode = True # For printing out results of various functions during the code run
 
 def fitness1(expression):
     try:
+        # print("Expression to test: " , end="")
+        # print_expression(expression)
         predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+        # print("ttt")
         dif_squared_arr = []
         for i in range(len(y_values)):
             if predicted_y[i] > 10000000000:
+                # print("napaka: mse = -1.0")
                 return (-1.0, expression)
-            dif_squared = np.power((predicted_y[i] - y_values[i]), 2)
+            # dif_squared = np.power((np.log(np.abs(predicted_y[i]) + 1e-6) - np.log(np.abs(y_values[i]) + 1e-6)), 2)
+            dif_squared = np.power(predicted_y[i] - y_values[i], 2)
             dif_squared_arr.append(dif_squared)
+        # print("asdasd")
         mse = np.mean(np.array(dif_squared_arr))
+        # print("mse = " + str(mse))
         if mse > 10000000000:
             return (-3.0, expression)
         return (1.0 / (mse + 1e-6), expression)  # Avoid division by zero
@@ -79,6 +86,8 @@ for generation in range(max_generations):
     
     fitness_scores1 = [fitness1(individual) for individual in population]
     fitness_scores2 = [fitness2(individual) for individual in population]
+    
+    print("done with that")
     
     fitness_scores = []
     # print("fitness_scores:   ")
