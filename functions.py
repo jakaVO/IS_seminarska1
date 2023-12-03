@@ -4,7 +4,7 @@ import math
 import copy
 from sympy import sympify, simplify
 
-complex_expressions = True
+complex_expressions = False
 invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers, negative value in log...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -295,11 +295,11 @@ def crossover(parent1, parent2):
     # Create deep copies of the parents to avoid modifying them directly
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-
+    operators_extended = ['+', '-', '*', '/', '**', 'log', 'sin', 'cos']
     # Select a non-root node from parent1
-    parent1_node = get_random_non_root_node(parent1)
+    parent1_node = get_random_non_root_node_with_operator(parent1,operators_extended)
     # Select a non-root node from parent2
-    parent2_node = get_random_non_root_node(parent2)
+    parent2_node = get_random_non_root_node_with_operator(parent2,operators_extended)
 
     # Swap the selected nodes and their descendants
     swap_nodes(child1, parent1_node, parent2_node)
@@ -309,23 +309,23 @@ def crossover(parent1, parent2):
 
     return child1, child2
 
-def get_random_non_root_node(tree):
-    # Get a list of all non-root nodes in the tree
-    non_root_nodes = get_non_root_nodes(tree)
+def get_random_non_root_node_with_operator(tree, operators):
+    # Get a list of all non-root nodes with values in the specified operators list
+    valid_nodes = get_valid_nodes(tree, operators)
 
-    # Select a random non-root node
-    return random.choice(non_root_nodes)
+    # Select a random node from the valid nodes
+    return random.choice(valid_nodes)
 
-def get_non_root_nodes(node):
-    # Helper function to get a list of all non-root nodes in the tree
-    non_root_nodes = []
+def get_valid_nodes(node, operators):
+    # Helper function to get a list of all non-root nodes with values in the specified operators list
+    valid_nodes = []
+    if node and node.value in operators:
+        valid_nodes.append(node)
     if node.left:
-        non_root_nodes.append(node.left)
-        non_root_nodes.extend(get_non_root_nodes(node.left))
+        valid_nodes.extend(get_valid_nodes(node.left, operators))
     if node.right:
-        non_root_nodes.append(node.right)
-        non_root_nodes.extend(get_non_root_nodes(node.right))
-    return non_root_nodes
+        valid_nodes.extend(get_valid_nodes(node.right, operators))
+    return valid_nodes
 
 def swap_nodes(tree, node1, node2):
     # Helper function to swap two nodes and their descendants in the tree
