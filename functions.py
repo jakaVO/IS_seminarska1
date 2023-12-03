@@ -1,10 +1,11 @@
 import random
 import numpy as np
 import math
-from copy import deepcopy
+import copy
+from sympy import sympify, simplify
 
-complex_expressions = False
-invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
+complex_expressions = True
+invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers, negative value in log...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 operators = ['+', '-', '*', '/', '**'] # Operators with both left and right child
@@ -68,11 +69,13 @@ def generate_random_tree(max_height, depth=0):
         operator = random.choice(operators + operatorsC + trigonometric)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
+        if operator == '**' and node.left.value == '1':
+            node.left.value = random.choice(digits[1:])
         if operator == 'log':
             node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
-        if operator != 'sin' and operator != 'cos':
+        elif operator != 'sin' and operator != 'cos':
             node.right = generate_random_tree(max_height, depth + 1)
-            if node.left.value.isalnum() and node.right.value.isalnum():
+            if node.left.value in digits + ['x', 'e'] and node.right.value in digits + ['x', 'e']:
                 if node.value in '+*':
                     node.left.value = 'x'
                     node.right.value = random.choice(digits)
@@ -83,12 +86,16 @@ def generate_random_tree(max_height, depth=0):
                     else:
                         node.left.value = random.choice(digits)
                         node.right.value = random.choice(['x', 'e'])
+                elif node.value == '**' and node.left.value in digits and node.right.value in digits:
+                    node.right.value = random.choice(['x', 'e'])
         return node
     else:
         operator = random.choice(operators)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
         if operator == '**':
+            if node.left.value in digits:
+                node.left.value = 'x'
             node.right = TreeNode(random.choice(digits))
         else:
             node.right = generate_random_tree(max_height, depth + 1)
@@ -135,25 +142,32 @@ def print_expressions(arr, new = True):
     else:
         print("]")
 
-def print_expression(node):
-    print_expression_rec(node)
-    print()
-
 def print_expression_rec(node):
-    if node is not None:
-        if node.left is not None or node.right is not None:
-            if is_operator(node.value):
-                if node.value in ['+', '-', '*', '/', '**']:
-                    print("(", end="")
-                print_expression_rec(node.left)
-                print(node.value, end="")
-                print_expression_rec(node.right)
-                if node.value in ['+', '-', '*', '/', '**']:
-                    print(")", end="")
-            else:
-                print_expression_rec(node.left)
-                print(node.value, end="")
-                print_expression_rec(node.right)
+    if complex_expressions and node is not None:
+        if node.value == 'sin' or node.value == 'cos':
+            print(node.value, end="(")
+            print_expression_rec(node.left)
+            print(")", end="")
+        elif node.value == 'log':
+            print_expression_rec(node.right)
+            print(node.value, end="(")
+            print_expression_rec(node.left)
+            print(")", end="")
+        elif is_operator(node.value):
+            print("(", end="")
+            print_expression_rec(node.left)
+            print(node.value, end="")
+            print_expression_rec(node.right)
+            print(")", end="")
+        else:
+            print(node.value, end="")
+    elif node is not None:
+        if is_operator(node.value):
+            print("(", end="")
+            print_expression_rec(node.left)
+            print(node.value, end="")
+            print_expression_rec(node.right)
+            print(")", end="")
         else:
             print(node.value, end="")
 
@@ -164,7 +178,7 @@ def evaluate(node, x):
         invalid_expression = False
         return 0
     if node != None:
-        if node.value in digits + ['x', 'e']:
+        if node.value in digits + ['x', 'e', '10']:
             if node.value == 'x':
                 return x
             elif complex_expressions and node.value == 'e':
@@ -202,6 +216,51 @@ def evaluate(node, x):
                 return math.cos(angle)
     return None
 
+def generate_operation(node):
+    if complex_expressions:
+        operator = random.choice(operators + operatorsC + trigonometric)
+        if operator in trigonometric:
+            node.left = TreeNode(node.value)
+            node.right = None
+        else:
+            if node.value in digits:
+                if random.choice([True, False]) or operator == 'log':
+                    node.left = TreeNode(random.choice(['x', 'e']))
+                    node.right = TreeNode(node.value)
+                    if operator == 'log' and node.right.value == '1':
+                        node.right.value = '2'
+                else:
+                    node.left = TreeNode(node.value)
+                    node.right = TreeNode(random.choice(['x', 'e']))
+            else:
+                if random.choice([True, False]) or operator == 'log':
+                    node.left = TreeNode(node.value)
+                    if operator == 'log':
+                        node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
+                    else:
+                        node.right = TreeNode(random.choice(digits))
+                else:
+                    node.left = TreeNode(random.choice(digits))
+                    node.right = TreeNode(node.value)
+    else:
+        operator = random.choice(operators)
+        if node.value in digits:
+            if random.choice([True, False]) or operator == '**':
+                node.left = TreeNode('x')
+                node.right = TreeNode(node.value)
+            else:
+                node.left = TreeNode(node.value)
+                node.right = TreeNode('x')
+        else:
+            if random.choice([True, False]) or operator == '**':
+                node.left = TreeNode('x')
+                node.right = TreeNode(random.choice(digits))
+            else:
+                node.left = TreeNode(random.choice(digits))
+                node.right = TreeNode('x')
+    node.value = operator
+    return node
+
 def mutate(root, mutation_rate):
 
     # print("Pred mutacijo: ")
@@ -229,18 +288,21 @@ def mutate(root, mutation_rate):
         if len(nodes_array_filtered) > 0:
             random_node = random.choice(nodes_array_filtered)
             if mutation_type == "change_operator":
-                random_node.value = random.choice([x for x in operators if x != random_node.value])
+                if random_node.value == 'sin':
+                    random_node.value = 'cos'
+                elif random_node.value == 'cos':
+                    random_node.value = 'sin'
+                elif random_node.value != 'log':
+                    random_node.value = random.choice([x for x in operators if x != random_node.value])
             if mutation_type == "change_operand":
                 random_node.value = random.choice([x for x in digits if x != random_node.value])
             if mutation_type == "add_operation":
-                random_operation = generate_random_tree(1)
+                random_operation = generate_operation(random_node)
                 random_node.value = random_operation.value
-                # mogoce lahko implementiramo da vzame value ki je bil prej na tem mestu:
-                # npr. iz "3" bi potem lahko dobili samo "x + 3", ker zdaj lahko dobimo tudi karkoli drugega npr. "x * 4" kar nima vec veze s "3"
                 random_node.left = random_operation.left
                 random_node.right = random_operation.right
             if mutation_type== "remove_operation": # tuki je treba nardit se da bo nov value x alpa digit glede na to a je na drugi strani enacbe x alpa digit (bi rabl mogoce node.parent)
-                random_node.value = random.choice(digits + ["x"])
+                random_node.value = random.choice([random_node.left.value, random_node.right.value])
                 random_node.left = None
                 random_node.right = None
             
@@ -248,8 +310,8 @@ def mutate(root, mutation_rate):
 
     # print("Po: ")
     # print_expression(root)
-    if number_of_x_values(nodes_to_array(root)) == 0:
-        return mutate(root, mutation_rate)
+    # if number_of_x_values(nodes_to_array(root)) == 0:
+    #     return mutate(root, mutation_rate)
     return root
 
 def tree_copy(root):
@@ -276,44 +338,46 @@ def nodes_to_array(root):
     in_order_traversal(root, result)
     return result
 
-# tree = generate_random_tree(10)
-# print_expression(tree)
-# def is_operand(node):
-#     return node.value.isdigit() or node.value in {'+', '-', '*', '**', '/'}
+def flatten_tree(node):
+    if node is None:
+        return []
+    return flatten_tree(node.left) + [node] + flatten_tree(node.right)
 
 def crossover(parent1, parent2):
     # Create deep copies of the parents to avoid modifying them directly
     child1 = copy.deepcopy(parent1)
     child2 = copy.deepcopy(parent2)
-    operators_extended = ['+', '-', '*', '/', '**', 'log', 'sin', 'cos']
-    # Select a non-root node from parent1
-    parent1_node = get_random_non_root_node_with_operator(parent1,operators_extended)
-    # Select a non-root node from parent2
-    parent2_node = get_random_non_root_node_with_operator(parent2,operators_extended)
 
-    # Swap subtrees between the two parents at the crossover points
-    swap_subtrees(child1, crossover_point1, parent2, crossover_point2)
-    swap_subtrees(child2, crossover_point2, parent1, crossover_point1)
+    # Select a non-root node from parent1
+    parent1_node = get_random_non_root_node(parent1)
+    # Select a non-root node from parent2
+    parent2_node = get_random_non_root_node(parent2)
+
+    # Swap the selected nodes and their descendants
+    swap_nodes(child1, parent1_node, parent2_node)
+
+    # Swap the selected nodes and their descendants in the second child
+    swap_nodes(child2, parent2_node, parent1_node)
 
     return child1, child2
 
-def get_random_non_root_node_with_operator(tree, operators):
-    # Get a list of all non-root nodes with values in the specified operators list
-    valid_nodes = get_valid_nodes(tree, operators)
+def get_random_non_root_node(tree):
+    # Get a list of all non-root nodes in the tree
+    non_root_nodes = get_non_root_nodes(tree)
 
-    # Select a random node from the valid nodes
-    return random.choice(valid_nodes)
+    # Select a random non-root node
+    return random.choice(non_root_nodes)
 
-def get_valid_nodes(node, operators):
-    # Helper function to get a list of all non-root nodes with values in the specified operators list
-    valid_nodes = []
-    if node and node.value in operators:
-        valid_nodes.append(node)
+def get_non_root_nodes(node):
+    # Helper function to get a list of all non-root nodes in the tree
+    non_root_nodes = []
     if node.left:
-        valid_nodes.extend(get_valid_nodes(node.left, operators))
+        non_root_nodes.append(node.left)
+        non_root_nodes.extend(get_non_root_nodes(node.left))
     if node.right:
-        valid_nodes.extend(get_valid_nodes(node.right, operators))
-    return valid_nodes
+        non_root_nodes.append(node.right)
+        non_root_nodes.extend(get_non_root_nodes(node.right))
+    return non_root_nodes
 
 def swap_nodes(tree, node1, node2):
     # Helper function to swap two nodes and their descendants in the tree
@@ -353,6 +417,15 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
+tree = generate_random_tree(3)
+print_tree(tree)
+print_expression_rec(tree)
+print()
+mutated = mutate(tree, 1)
+print_tree(mutated)
+print_expression_rec(mutated)
+print()
+
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
 # population = [tree1, tree2]
@@ -360,12 +433,42 @@ def uniqueExpressions(population):
 #     population = population[:-1]
 
 # print(len(population))
-
+"""
 expression = generate_random_tree(1)
-print_expression(expression)
 x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 print(predicted_y)
+"""
+
+""" tree1 = generate_random_tree(5)
+tree2 = generate_random_tree(5)
+arrT1 = nodes_to_array(tree1)
+s = ""
+for i in range(len(arrT1)):
+    s += str(arrT1[i].value)
+print(s)
+simp = sympify(s)
+simp1 = simplify(simp)
+print_expression_rec(tree1)
+print()
+print("Simplified expression:", simp1) """
+
+"""
+tree1 = generate_random_tree(3)
+tree2 = generate_random_tree(3)
+chld1, chld2 = crossover(tree1, tree2)
+
+print_tree(tree1)
+print_expression_rec(tree1)
+print()
+print_tree(tree2)
+print_expression_rec(tree2)
+print()
+print_tree(chld1)
+print_expression_rec(chld1)
+print()
+print_tree(chld2)
+print_expression_rec(chld2)"""
