@@ -36,14 +36,14 @@ parent1 = trees[0]
 parent2 = trees[1]
 arr = nodes_to_array(parent1)
 print()
-print_expression(parent1)
+print_expression_rec(parent1)
 print()
-print_expression(parent2)
+print_expression_rec(parent2)
 print()
 child1, child2 = crossover(parent1, parent2)
-print_expression(child1)
+print_expression_rec(child1)
 print()
-print_expression(child2)
+print_expression_rec(child2)
 print()
 
 
@@ -79,7 +79,3 @@ def parse_expression(expression_str):
 # Get the best solution found by the genetic algorithm
 # best_solution = ga.best_solution()
 #3 print(best_solution)
-
-
-# print("main branch zacni delat")
-# print("Raztegnu ti bom supak")

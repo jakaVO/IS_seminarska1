@@ -94,7 +94,11 @@ for generation in range(max_generations):
     
     print("Best current expression: ", end="")
     print(str(selected_parents[0][0]) + ", ", end="")
+<<<<<<< HEAD
     print_expression(selected_parents[0][1])
+=======
+    print_expression_rec(selected_parents[0][1])
+>>>>>>> refs/remotes/origin/task2
     
     for i in range(len(all_best_fitness_scores)):
         if i > 10:
@@ -162,7 +166,7 @@ for generation in range(max_generations):
 best_individual = population[0]
 
 print("Best Equation:")
-print_expression(best_individual)
+print_expression_rec(best_individual)
 print("Correct equation:")
 print(correct_solution)
 
