@@ -90,12 +90,8 @@ for generation in range(max_generations):
     print("done with that")
     
     fitness_scores = []
-    # print("fitness_scores:   ")
-    # print("[", end="")
     for i in range(len(fitness_scores1)):
         new_x = (fitness_weight * fitness_scores1[i][0] + (1 - fitness_weight) * fitness_scores2[i][0], fitness_scores2[i][1])
-        # print(str(fitness_scores[i][0]), end=", ")
-    # print("]")
         fitness_scores.append(new_x)
 
     selected_parents = sorted(fitness_scores, key=lambda x: x[0], reverse=True)[:number_of_parents]
@@ -116,8 +112,8 @@ for generation in range(max_generations):
         if mutation_rate > 0.7:
             fresh_parents_to_add += 1
     all_best_fitness_scores.append(fitness_scores[0][0])
-    # print("recent fitness scores: ", end="")
-    # print(all_best_fitness_scores)
+    print("recent fitness scores: ", end="")
+    print(all_best_fitness_scores)
                 
     # if debugging_mode:
     #     print("mutation_rate = " + str(mutation_rate))
@@ -162,9 +158,9 @@ for generation in range(max_generations):
         else:
             i += 1
             
-    if debugging_mode:
-        print("Nova populacija: ", end="")
-        print_expressions(new_population)
+    # if debugging_mode:
+    #     print("Nova populacija: ", end="")
+    #     print_expressions(new_population)
 
     population = new_population
 
@@ -178,5 +174,5 @@ print(correct_solution)
 plt.plot(range(len(all_mutation_rates)), all_mutation_rates)
 plt.show()
 
-# plt.plot(range(len(all_best_fitness_scores)), all_best_fitness_scores)
-# plt.show()
+plt.plot(range(len(all_best_fitness_scores)), all_best_fitness_scores)
+plt.show()
