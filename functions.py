@@ -374,6 +374,11 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
+tree = generate_random_tree(5)
+print_tree(tree)
+print_expression_rec(tree)
+print(evaluate(tree, 5))
+
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
 # population = [tree1, tree2]
@@ -381,7 +386,7 @@ def uniqueExpressions(population):
 #     population = population[:-1]
 
 # print(len(population))
-
+"""
 expression = generate_random_tree(1)
 x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
@@ -389,3 +394,4 @@ predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 print(predicted_y)
+"""
