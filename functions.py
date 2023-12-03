@@ -216,6 +216,51 @@ def evaluate(node, x):
                 return math.cos(angle)
     return None
 
+def generate_operation(node):
+    if complex_expressions:
+        operator = random.choice(operators + operatorsC + trigonometric)
+        if operator in trigonometric:
+            node.left = TreeNode(node.value)
+            node.right = None
+        else:
+            if node.value in digits:
+                if random.choice([True, False]) or operator == 'log':
+                    node.left = TreeNode(random.choice(['x', 'e']))
+                    node.right = TreeNode(node.value)
+                    if operator == 'log' and node.right.value == '1':
+                        node.right.value = '2'
+                else:
+                    node.left = TreeNode(node.value)
+                    node.right = TreeNode(random.choice(['x', 'e']))
+            else:
+                if random.choice([True, False]) or operator == 'log':
+                    node.left = TreeNode(node.value)
+                    if operator == 'log':
+                        node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
+                    else:
+                        node.right = TreeNode(random.choice(digits))
+                else:
+                    node.left = TreeNode(random.choice(digits))
+                    node.right = TreeNode(node.value)
+    else:
+        operator = random.choice(operators)
+        if node.value in digits:
+            if random.choice([True, False]) or operator == '**':
+                node.left = TreeNode('x')
+                node.right = TreeNode(node.value)
+            else:
+                node.left = TreeNode(node.value)
+                node.right = TreeNode('x')
+        else:
+            if random.choice([True, False]) or operator == '**':
+                node.left = TreeNode('x')
+                node.right = TreeNode(random.choice(digits))
+            else:
+                node.left = TreeNode(random.choice(digits))
+                node.right = TreeNode('x')
+    node.value = operator
+    return node
+
 def mutate(root, mutation_rate):
 
     # print("Pred mutacijo: ")
@@ -243,18 +288,21 @@ def mutate(root, mutation_rate):
         if len(nodes_array_filtered) > 0:
             random_node = random.choice(nodes_array_filtered)
             if mutation_type == "change_operator":
-                random_node.value = random.choice([x for x in operators if x != random_node.value])
+                if random_node.value == 'sin':
+                    random_node.value = 'cos'
+                elif random_node.value == 'cos':
+                    random_node.value = 'sin'
+                elif random_node.value != 'log':
+                    random_node.value = random.choice([x for x in operators if x != random_node.value])
             if mutation_type == "change_operand":
                 random_node.value = random.choice([x for x in digits if x != random_node.value])
             if mutation_type == "add_operation":
-                random_operation = generate_random_tree(1)
+                random_operation = generate_operation(random_node)
                 random_node.value = random_operation.value
-                # mogoce lahko implementiramo da vzame value ki je bil prej na tem mestu:
-                # npr. iz "3" bi potem lahko dobili samo "x + 3", ker zdaj lahko dobimo tudi karkoli drugega npr. "x * 4" kar nima vec veze s "3"
                 random_node.left = random_operation.left
                 random_node.right = random_operation.right
             if mutation_type== "remove_operation": # tuki je treba nardit se da bo nov value x alpa digit glede na to a je na drugi strani enacbe x alpa digit (bi rabl mogoce node.parent)
-                random_node.value = random.choice(digits + ["x"])
+                random_node.value = random.choice([random_node.left.value, random_node.right.value])
                 random_node.left = None
                 random_node.right = None
             
@@ -262,8 +310,8 @@ def mutate(root, mutation_rate):
 
     # print("Po: ")
     # print_expression(root)
-    if number_of_x_values(nodes_to_array(root)) == 0:
-        return mutate(root, mutation_rate)
+    # if number_of_x_values(nodes_to_array(root)) == 0:
+    #     return mutate(root, mutation_rate)
     return root
 
 def tree_copy(root):
@@ -369,10 +417,14 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
-""" tree = generate_random_tree(5)
+tree = generate_random_tree(3)
 print_tree(tree)
 print_expression_rec(tree)
-#print(evaluate(tree, 5)) """
+print()
+mutated = mutate(tree, 1)
+print_tree(mutated)
+print_expression_rec(mutated)
+print()
 
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
@@ -404,14 +456,19 @@ print_expression_rec(tree1)
 print()
 print("Simplified expression:", simp1) """
 
-tree1 = generate_random_tree(5)
-tree2 = generate_random_tree(5)
+"""
+tree1 = generate_random_tree(3)
+tree2 = generate_random_tree(3)
 chld1, chld2 = crossover(tree1, tree2)
 
+print_tree(tree1)
 print_expression_rec(tree1)
 print()
+print_tree(tree2)
 print_expression_rec(tree2)
 print()
+print_tree(chld1)
 print_expression_rec(chld1)
 print()
-print_expression_rec(chld2)
+print_tree(chld2)
+print_expression_rec(chld2)"""
