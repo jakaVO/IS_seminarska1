@@ -1,11 +1,10 @@
 import random
 import numpy as np
 import math
-import copy
-from sympy import sympify, simplify
+from copy import deepcopy
 
 complex_expressions = False
-invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers, negative value in log...)
+invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 operators = ['+', '-', '*', '/', '**'] # Operators with both left and right child
@@ -69,13 +68,11 @@ def generate_random_tree(max_height, depth=0):
         operator = random.choice(operators + operatorsC + trigonometric)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
-        if operator == '**' and node.left.value == '1':
-            node.left.value = random.choice(digits[1:])
         if operator == 'log':
             node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
-        elif operator != 'sin' and operator != 'cos':
+        if operator != 'sin' and operator != 'cos':
             node.right = generate_random_tree(max_height, depth + 1)
-            if node.left.value in digits + ['x', 'e'] and node.right.value in digits + ['x', 'e']:
+            if node.left.value.isalnum() and node.right.value.isalnum():
                 if node.value in '+*':
                     node.left.value = 'x'
                     node.right.value = random.choice(digits)
@@ -86,16 +83,12 @@ def generate_random_tree(max_height, depth=0):
                     else:
                         node.left.value = random.choice(digits)
                         node.right.value = random.choice(['x', 'e'])
-                elif node.value == '**' and node.left.value in digits and node.right.value in digits:
-                    node.right.value = random.choice(['x', 'e'])
         return node
     else:
         operator = random.choice(operators)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
         if operator == '**':
-            if node.left.value in digits:
-                node.left.value = 'x'
             node.right = TreeNode(random.choice(digits))
         else:
             node.right = generate_random_tree(max_height, depth + 1)
@@ -142,32 +135,25 @@ def print_expressions(arr, new = True):
     else:
         print("]")
 
+def print_expression(node):
+    print_expression_rec(node)
+    print()
+
 def print_expression_rec(node):
-    if complex_expressions and node is not None:
-        if node.value == 'sin' or node.value == 'cos':
-            print(node.value, end="(")
-            print_expression_rec(node.left)
-            print(")", end="")
-        elif node.value == 'log':
-            print_expression_rec(node.right)
-            print(node.value, end="(")
-            print_expression_rec(node.left)
-            print(")", end="")
-        elif is_operator(node.value):
-            print("(", end="")
-            print_expression_rec(node.left)
-            print(node.value, end="")
-            print_expression_rec(node.right)
-            print(")", end="")
-        else:
-            print(node.value, end="")
-    elif node is not None:
-        if is_operator(node.value):
-            print("(", end="")
-            print_expression_rec(node.left)
-            print(node.value, end="")
-            print_expression_rec(node.right)
-            print(")", end="")
+    if node is not None:
+        if node.left is not None or node.right is not None:
+            if is_operator(node.value):
+                if node.value in ['+', '-', '*', '/', '**']:
+                    print("(", end="")
+                print_expression_rec(node.left)
+                print(node.value, end="")
+                print_expression_rec(node.right)
+                if node.value in ['+', '-', '*', '/', '**']:
+                    print(")", end="")
+            else:
+                print_expression_rec(node.left)
+                print(node.value, end="")
+                print_expression_rec(node.right)
         else:
             print(node.value, end="")
 
@@ -178,7 +164,7 @@ def evaluate(node, x):
         invalid_expression = False
         return 0
     if node != None:
-        if node.value in digits + ['x', 'e', '10']:
+        if node.value in digits + ['x', 'e']:
             if node.value == 'x':
                 return x
             elif complex_expressions and node.value == 'e':
@@ -290,6 +276,10 @@ def nodes_to_array(root):
     in_order_traversal(root, result)
     return result
 
+# tree = generate_random_tree(10)
+# print_expression(tree)
+# def is_operand(node):
+#     return node.value.isdigit() or node.value in {'+', '-', '*', '**', '/'}
 
 def crossover(parent1, parent2):
     # Create deep copies of the parents to avoid modifying them directly
@@ -301,11 +291,9 @@ def crossover(parent1, parent2):
     # Select a non-root node from parent2
     parent2_node = get_random_non_root_node_with_operator(parent2,operators_extended)
 
-    # Swap the selected nodes and their descendants
-    swap_nodes(child1, parent1_node, parent2_node)
-
-    # Swap the selected nodes and their descendants in the second child
-    swap_nodes(child2, parent2_node, parent1_node)
+    # Swap subtrees between the two parents at the crossover points
+    swap_subtrees(child1, crossover_point1, parent2, crossover_point2)
+    swap_subtrees(child2, crossover_point2, parent1, crossover_point1)
 
     return child1, child2
 
@@ -365,11 +353,6 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
-""" tree = generate_random_tree(5)
-print_tree(tree)
-print_expression_rec(tree)
-#print(evaluate(tree, 5)) """
-
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
 # population = [tree1, tree2]
@@ -377,37 +360,12 @@ print_expression_rec(tree)
 #     population = population[:-1]
 
 # print(len(population))
-"""
+
 expression = generate_random_tree(1)
+print_expression(expression)
 x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 print(predicted_y)
-"""
-
-""" tree1 = generate_random_tree(5)
-tree2 = generate_random_tree(5)
-arrT1 = nodes_to_array(tree1)
-s = ""
-for i in range(len(arrT1)):
-    s += str(arrT1[i].value)
-print(s)
-simp = sympify(s)
-simp1 = simplify(simp)
-print_expression_rec(tree1)
-print()
-print("Simplified expression:", simp1) """
-
-tree1 = generate_random_tree(5)
-tree2 = generate_random_tree(5)
-chld1, chld2 = crossover(tree1, tree2)
-
-print_expression_rec(tree1)
-print()
-print_expression_rec(tree2)
-print()
-print_expression_rec(chld1)
-print()
-print_expression_rec(chld2)
