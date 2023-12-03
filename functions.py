@@ -428,13 +428,103 @@ def uniqueExpressions(population):
                 return uniqueExpressions(population)
     return population
 
-# tree1 = generate_random_tree(3)
-# arrT1 = nodes_to_array(tree1)
-# s = ""
-# for i in range(len(arrT1)):
-#     s += str(arrT1[i].value)
-# print(s)
-# print_expression(tree1)
-# simp = sympify(s)
-# simp1 = simplify(simp)
-# print("Simplified expression:", simp1)
+
+def expression_to_string_rec(node):
+    result = ""
+    if complex_expressions and node is not None:
+        if node.value == 'sin' or node.value == 'cos':
+            result += node.value + "("
+            result += expression_to_string_rec(node.left)
+            result += ")"
+        elif node.value == 'log':
+            result += "log("
+            result += expression_to_string_rec(node.left)
+            result += ", "
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        elif is_operator(node.value):
+            result += "("
+            result += expression_to_string_rec(node.left)
+            result += node.value
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        else:
+            result += node.value
+    elif node is not None:
+        if is_operator(node.value):
+            result += "("
+            result += expression_to_string_rec(node.left)
+            result += node.value
+            result += expression_to_string_rec(node.right)
+            result += ")"
+        else:
+            result += node.value
+    return result
+
+def simplify_tree(tree_to_simp):
+    s = expression_to_string_rec(tree_to_simp)
+    simp = sympify(s)
+    simp1 = simplify(simp)
+    print("Normal expression", s)
+    print("Simplified expression:", simp1)
+
+
+tree11 = generate_random_tree(5)
+simplify_tree(tree11)
+
+
+""" tree = generate_random_tree(3)
+print_tree(tree)
+print_expression_rec(tree)
+print()
+mutated = mutate(tree, 1)
+print_tree(mutated)
+print_expression_rec(mutated)
+print() """
+
+# tree1 = generate_random_tree(25)
+# tree2 = tree_copy(tree1)
+# population = [tree1, tree2]
+# if expressionsAreRepeating(population):
+#     population = population[:-1]
+
+# print(len(population))
+"""
+expression = generate_random_tree(1)
+x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
+print(predicted_y)
+"""
+
+""" tree1 = generate_random_tree(5)
+tree2 = generate_random_tree(5)
+arrT1 = nodes_to_array(tree1)
+s = ""
+for i in range(len(arrT1)):
+    s += str(arrT1[i].value)
+print(s)
+simp = sympify(s)
+simp1 = simplify(simp)
+print_expression_rec(tree1)
+print()
+print("Simplified expression:", simp1) """
+
+"""
+tree1 = generate_random_tree(3)
+tree2 = generate_random_tree(3)
+chld1, chld2 = crossover(tree1, tree2)
+
+print_tree(tree1)
+print_expression_rec(tree1)
+print()
+print_tree(tree2)
+print_expression_rec(tree2)
+print()
+print_tree(chld1)
+print_expression_rec(chld1)
+print()
+print_tree(chld2)
+print_expression_rec(chld2)"""
