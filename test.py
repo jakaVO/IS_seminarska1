@@ -95,6 +95,6 @@ for generation in range(max_generations):
 best_individual = population[0]
 
 print("Best Equation:")
-print_expression(best_individual)
+print_expression_rec(best_individual)
 print("Correct equation:")
 print(correct_solution)

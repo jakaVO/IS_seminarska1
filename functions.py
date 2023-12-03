@@ -3,7 +3,7 @@ import numpy as np
 import math
 from copy import deepcopy
 
-complex_expressions = False
+complex_expressions = True
 invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -50,9 +50,11 @@ def generate_random_tree(max_height, depth=0):
         operator = random.choice(operators + operatorsC + trigonometric)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
+        if operator == '**' and node.left.value == '1':
+            node.left.value = random.choice(digits[1:])
         if operator == 'log':
             node.right = TreeNode(random.choice(['2', '3', '4', '5', '6', '7', '8', '9', '10', 'e']))
-        if operator != 'sin' and operator != 'cos':
+        elif operator != 'sin' and operator != 'cos':
             node.right = generate_random_tree(max_height, depth + 1)
             if node.left.value in digits + ['x', 'e'] and node.right.value in digits + ['x', 'e']:
                 if node.value in '+*':
@@ -65,12 +67,16 @@ def generate_random_tree(max_height, depth=0):
                     else:
                         node.left.value = random.choice(digits)
                         node.right.value = random.choice(['x', 'e'])
+                elif node.value == '**' and node.left.value in digits and node.right.value in digits:
+                    node.right.value = random.choice(['x', 'e'])
         return node
     else:
         operator = random.choice(operators)
         node = TreeNode(operator)
         node.left = generate_random_tree(max_height, depth + 1)
         if operator == '**':
+            if node.left.value in digits:
+                node.left.value = 'x'
             node.right = TreeNode(random.choice(digits))
         else:
             node.right = generate_random_tree(max_height, depth + 1)
@@ -152,7 +158,7 @@ def evaluate(node, x):
     if invalid_expression:
         return 0
     if node != None:
-        if node.value in digits + ['x', 'e']:
+        if node.value in digits + ['x', 'e', '10']:
             if node.value == 'x':
                 return x
             elif complex_expressions and node.value == 'e':

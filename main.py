@@ -36,14 +36,14 @@ parent1 = trees[0]
 parent2 = trees[1]
 arr = nodes_to_array(parent1)
 print()
-print_expression(parent1)
+print_expression_rec(parent1)
 print()
-print_expression(parent2)
+print_expression_rec(parent2)
 print()
 child1, child2 = crossover(parent1, parent2)
-print_expression(child1)
+print_expression_rec(child1)
 print()
-print_expression(child2)
+print_expression_rec(child2)
 print()
 
 
