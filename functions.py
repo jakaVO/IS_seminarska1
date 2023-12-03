@@ -290,12 +290,6 @@ def nodes_to_array(root):
     in_order_traversal(root, result)
     return result
 
-tree = generate_random_tree(10)
-#print_expression(tree)
-def flatten_tree(node):
-    if node is None:
-        return []
-    return flatten_tree(node.left) + [node] + flatten_tree(node.right)
 
 def crossover(parent1, parent2):
     # Create deep copies of the parents to avoid modifying them directly
