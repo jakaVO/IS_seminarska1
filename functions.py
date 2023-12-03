@@ -2,6 +2,7 @@ import random
 import numpy as np
 import math
 import copy
+from copy import deepcopy
 from sympy import sympify, simplify
 
 complex_expressions = True
