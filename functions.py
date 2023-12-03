@@ -2,6 +2,7 @@ import random
 import numpy as np
 import math
 from copy import deepcopy
+from sympy import sympify, simplify
 
 complex_expressions = True
 invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers...)
@@ -377,7 +378,7 @@ def uniqueExpressions(population):
 tree = generate_random_tree(5)
 print_tree(tree)
 print_expression_rec(tree)
-print(evaluate(tree, 5))
+#print(evaluate(tree, 5))
 
 # tree1 = generate_random_tree(25)
 # tree2 = tree_copy(tree1)
@@ -395,3 +396,16 @@ predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
 print(predicted_y)
 """
+
+tree1 = generate_random_tree(5)
+tree2 = generate_random_tree(5)
+arrT1 = nodes_to_array(tree1)
+s = ""
+for i in range(len(arrT1)):
+    s += str(arrT1[i].value)
+print(s)
+simp = sympify(s)
+simp1 = simplify(simp)
+print_expression_rec(tree1)
+print()
+print("Simplified expression:", simp1)
