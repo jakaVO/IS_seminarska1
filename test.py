@@ -32,21 +32,15 @@ debugging_mode = True # For printing out results of various functions during the
 
 def fitness1(expression):
     try:
-        # print("Expression to test: " , end="")
-        # print_expression(expression)
         predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
-        # print("ttt")
         dif_squared_arr = []
         for i in range(len(y_values)):
             if predicted_y[i] > 10000000000:
-                # print("napaka: mse = -1.0")
                 return (-1.0, expression)
             # dif_squared = np.power((np.log(np.abs(predicted_y[i]) + 1e-6) - np.log(np.abs(y_values[i]) + 1e-6)), 2)
             dif_squared = np.power(predicted_y[i] - y_values[i], 2)
             dif_squared_arr.append(dif_squared)
-        # print("asdasd")
         mse = np.mean(np.array(dif_squared_arr))
-        # print("mse = " + str(mse))
         if mse > 10000000000:
             return (-3.0, expression)
         return (1.0 / (mse + 1e-6), expression)  # Avoid division by zero
@@ -87,15 +81,9 @@ for generation in range(max_generations):
     fitness_scores1 = [fitness1(individual) for individual in population]
     fitness_scores2 = [fitness2(individual) for individual in population]
     
-    print("done with that")
-    
     fitness_scores = []
-    # print("fitness_scores:   ")
-    # print("[", end="")
     for i in range(len(fitness_scores1)):
         new_x = (fitness_weight * fitness_scores1[i][0] + (1 - fitness_weight) * fitness_scores2[i][0], fitness_scores2[i][1])
-        # print(str(fitness_scores[i][0]), end=", ")
-    # print("]")
         fitness_scores.append(new_x)
 
     selected_parents = sorted(fitness_scores, key=lambda x: x[0], reverse=True)[:number_of_parents]
@@ -103,7 +91,7 @@ for generation in range(max_generations):
     
     print("Best current expression: ", end="")
     print(str(selected_parents[0][0]) + ", ", end="")
-    print_expression_rec(selected_parents[0][1])
+    print_expression(selected_parents[0][1])
     
     for i in range(len(all_best_fitness_scores)):
         if i > 10:
@@ -116,8 +104,8 @@ for generation in range(max_generations):
         if mutation_rate > 0.7:
             fresh_parents_to_add += 1
     all_best_fitness_scores.append(fitness_scores[0][0])
-    # print("recent fitness scores: ", end="")
-    # print(all_best_fitness_scores)
+    print("recent fitness scores: ", end="")
+    print(all_best_fitness_scores)
                 
     # if debugging_mode:
     #     print("mutation_rate = " + str(mutation_rate))
@@ -162,21 +150,21 @@ for generation in range(max_generations):
         else:
             i += 1
             
-    if debugging_mode:
-        print("Nova populacija: ", end="")
-        print_expressions(new_population)
+    # if debugging_mode:
+    #     print("Nova populacija: ", end="")
+    #     print_expressions(new_population)
 
     population = new_population
 
 best_individual = population[0]
 
 print("Best Equation:")
-print_expression_rec(best_individual)
+print_expression(best_individual)
 print("Correct equation:")
 print(correct_solution)
 
 plt.plot(range(len(all_mutation_rates)), all_mutation_rates)
 plt.show()
 
-# plt.plot(range(len(all_best_fitness_scores)), all_best_fitness_scores)
-# plt.show()
+plt.plot(range(len(all_best_fitness_scores)), all_best_fitness_scores)
+plt.show()

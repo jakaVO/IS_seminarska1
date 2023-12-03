@@ -1,14 +1,11 @@
 import random
 import numpy as np
 import math
-<<<<<<< HEAD
 import copy
-=======
 from copy import deepcopy
->>>>>>> 356f79d (izboljsave)
 from sympy import sympify, simplify
 
-complex_expressions = True
+complex_expressions = False
 invalid_expression = False # Flag for invalid expressions (dividing with 0, complex numbers, negative value in log...)
 
 digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -146,6 +143,10 @@ def print_expressions(arr, new = True):
     else:
         print("]")
 
+def print_expression(node):
+    print_expression_rec(node)
+    print()
+
 def print_expression_rec(node):
     if complex_expressions and node is not None:
         if node.value == 'sin' or node.value == 'cos':
@@ -181,6 +182,11 @@ def evaluate(node, x):
     if invalid_expression:
         invalid_expression = False
         return 0
+    
+    if node.left != None and node.right != None:
+        if node.value == "**" and (node.left.value == "**" or node.right.value == "**"):
+            return 0.0
+    
     if node != None:
         if node.value in digits + ['x', 'e', '10']:
             if node.value == 'x':
@@ -421,59 +427,3 @@ def uniqueExpressions(population):
                 del population[j]
                 return uniqueExpressions(population)
     return population
-
-tree = generate_random_tree(3)
-print_tree(tree)
-print_expression_rec(tree)
-print()
-mutated = mutate(tree, 1)
-print_tree(mutated)
-print_expression_rec(mutated)
-print()
-
-# tree1 = generate_random_tree(25)
-# tree2 = tree_copy(tree1)
-# population = [tree1, tree2]
-# if expressionsAreRepeating(population):
-#     population = population[:-1]
-
-# print(len(population))
-"""
-expression = generate_random_tree(1)
-x_values = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
-predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
-predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
-predicted_y = [evaluate(expression, xi) for xi in x_values.tolist()]
-print(predicted_y)
-"""
-
-""" tree1 = generate_random_tree(5)
-tree2 = generate_random_tree(5)
-arrT1 = nodes_to_array(tree1)
-s = ""
-for i in range(len(arrT1)):
-    s += str(arrT1[i].value)
-print(s)
-simp = sympify(s)
-simp1 = simplify(simp)
-print_expression_rec(tree1)
-print()
-print("Simplified expression:", simp1) """
-
-"""
-tree1 = generate_random_tree(3)
-tree2 = generate_random_tree(3)
-chld1, chld2 = crossover(tree1, tree2)
-
-print_tree(tree1)
-print_expression_rec(tree1)
-print()
-print_tree(tree2)
-print_expression_rec(tree2)
-print()
-print_tree(chld1)
-print_expression_rec(chld1)
-print()
-print_tree(chld2)
-print_expression_rec(chld2)"""
