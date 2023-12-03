@@ -1,11 +1,7 @@
 import random
 import numpy as np
 import math
-<<<<<<< HEAD
 import copy
-=======
-from copy import deepcopy
->>>>>>> 356f79d (izboljsave)
 from sympy import sympify, simplify
 
 complex_expressions = True
